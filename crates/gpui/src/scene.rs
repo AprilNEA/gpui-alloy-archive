@@ -54,6 +54,8 @@ pub struct Scene {
     pub backdrops: Vec<Backdrop>,
     pub shadows: Vec<Shadow>,
     pub quads: Vec<Quad>,
+    #[cfg(target_os = "macos")]
+    pub continuous_quads: Vec<Quad>,
     pub paths: Vec<Path<ScaledPixels>>,
     pub underlines: Vec<Underline>,
     pub monochrome_sprites: Vec<MonochromeSprite>,
@@ -75,6 +77,8 @@ impl Scene {
         self.paths.clear();
         self.shadows.clear();
         self.quads.clear();
+        #[cfg(target_os = "macos")]
+        self.continuous_quads.clear();
         self.underlines.clear();
         self.monochrome_sprites.clear();
         self.subpixel_sprites.clear();
@@ -111,9 +115,11 @@ impl Scene {
             return;
         }
         let bounds = match &primitive {
-            // Keep a backdrop when only its antialias fringe reaches the clip.
+            // Keep analytic shapes when only their antialias fringe reaches the clip.
             #[cfg(target_os = "macos")]
-            Primitive::Backdrop(_) => bounds.dilate(ScaledPixels(1.0)),
+            Primitive::Backdrop(_) | Primitive::ContinuousQuad(_) => {
+                bounds.dilate(ScaledPixels(1.0))
+            }
             _ => bounds,
         };
         let clipped_bounds = bounds.intersect(&primitive.content_mask().bounds);
@@ -124,7 +130,7 @@ impl Scene {
 
         let order = match &primitive {
             #[cfg(target_os = "macos")]
-            Primitive::Backdrop(_) => self.start_backdrop_epoch(),
+            Primitive::Backdrop(_) | Primitive::ContinuousQuad(_) => self.start_material_epoch(),
             _ => self
                 .layer_stack
                 .last()
@@ -144,6 +150,26 @@ impl Scene {
             Primitive::Quad(quad) => {
                 quad.order = order;
                 self.quads.push(*quad);
+            }
+            #[cfg(target_os = "macos")]
+            Primitive::ContinuousQuad(quad) => {
+                assert_eq!(
+                    quad.corner_radii,
+                    Corners::all(quad.corner_radii.top_left),
+                    "continuous quads require equal corner radii"
+                );
+                assert_eq!(
+                    quad.border_widths,
+                    Edges::all(quad.border_widths.top),
+                    "continuous quads require equal border widths"
+                );
+                assert_eq!(
+                    quad.border_style,
+                    BorderStyle::Solid,
+                    "continuous quads require solid borders"
+                );
+                quad.order = order;
+                self.continuous_quads.push(*quad);
             }
             Primitive::Path(path) => {
                 path.order = order;
@@ -188,6 +214,8 @@ impl Scene {
     pub fn finish(&mut self) {
         self.shadows.sort_by_key(|shadow| shadow.order);
         self.quads.sort_by_key(|quad| quad.order);
+        #[cfg(target_os = "macos")]
+        self.continuous_quads.sort_by_key(|quad| quad.order);
         self.paths.sort_by_key(|path| path.order);
         self.underlines.sort_by_key(|underline| underline.order);
         self.monochrome_sprites
@@ -222,6 +250,10 @@ pub(crate) enum PaintOperation {
 pub enum Primitive {
     Shadow(Shadow),
     Quad(Quad),
+    /// An equal-radius continuous outline with an optional uniform solid border.
+    /// Supported only by the native Metal renderer; uses the ordinary quad buffer layout.
+    #[cfg(target_os = "macos")]
+    ContinuousQuad(Quad),
     Path(Path<ScaledPixels>),
     Underline(Underline),
     MonochromeSprite(MonochromeSprite),
@@ -238,6 +270,8 @@ impl Primitive {
         match self {
             Primitive::Shadow(shadow) => &shadow.bounds,
             Primitive::Quad(quad) => &quad.bounds,
+            #[cfg(target_os = "macos")]
+            Primitive::ContinuousQuad(quad) => &quad.bounds,
             Primitive::Path(path) => &path.bounds,
             Primitive::Underline(underline) => &underline.bounds,
             Primitive::MonochromeSprite(sprite) => &sprite.bounds,
@@ -253,6 +287,8 @@ impl Primitive {
         match self {
             Primitive::Shadow(shadow) => &shadow.content_mask,
             Primitive::Quad(quad) => &quad.content_mask,
+            #[cfg(target_os = "macos")]
+            Primitive::ContinuousQuad(quad) => &quad.content_mask,
             Primitive::Path(path) => &path.content_mask,
             Primitive::Underline(underline) => &underline.content_mask,
             Primitive::MonochromeSprite(sprite) => &sprite.content_mask,

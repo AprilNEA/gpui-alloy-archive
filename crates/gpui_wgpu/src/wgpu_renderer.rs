@@ -1527,6 +1527,10 @@ impl WgpuRendererCore {
                     PrimitiveBatch::Backdrop(_) => {
                         anyhow::bail!("backdrop materials require the native Metal renderer")
                     }
+                    #[cfg(target_os = "macos")]
+                    PrimitiveBatch::ContinuousQuads(_) => {
+                        anyhow::bail!("continuous quads require the native Metal renderer")
+                    }
                     PrimitiveBatch::Quads(range) => self.draw_instances(
                         &instance_bindings.quads,
                         &self.resources().pipelines.quads,
