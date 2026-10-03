@@ -136,6 +136,56 @@ Cupertino 当前消费方式是 path 依赖 `gpui`，并非 `gpui-pre`。后续�
 
 依据：[Cargo 依赖来源](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#multiple-locations)和 [Cargo 覆盖规则](https://doc.rust-lang.org/cargo/reference/overriding-dependencies.html#the-patch-section)。
 
+## 导出工具和消费方来源检查
+
+`script/gpui_snapshot.py` 使用 Python 标准库和 Git。使用 Python 3.12 或更新版本。当前验收环境为 macOS arm64；保留符号链接和执行位是运行前提。Windows 尚未验收。导出和检查不会自动创建 tag、修改消费方 manifest、更新 lockfile 或发布 crate。
+
+`export` 接受完整的 `U` 和候选提交 SHA，并确认 `U` 是候选提交的祖先。只读取固定 Git tree/blob，忽略工作区改动、Git replace 和本地 archive attributes。输出目录必须不存在；不要直接覆盖现有 vendor。
+
+导出规则如下：
+
+- 从 `crates/gpui` 和 `crates/gpui_platform` 开始，递归收集全部 path 依赖，包括 optional、普通、build、dev 和各 target 的依赖。初始基线的闭包为 26 个 crate。
+- 保留完整 crate 目录、`assets/fonts` 和根许可证文件。源码、shader、资源、符号链接和执行位保持 Git 中的内容；不重命名包，不添加行为补丁，不裁剪 features。
+- 生成根 `Cargo.toml`，保留 resolver、workspace package、实际继承的 workspace dependencies 和 lints，替换 members。生成文件使用 UTF-8 和 LF，并重新解析 TOML 核对所选值。
+- 在 `alloy-source/` 保留原始根 `Cargo.toml`、`Cargo.lock`、`.cargo/config.toml` 和 `rust-toolchain.toml`，作为来源记录。这些文件不作为导出 workspace 的配置启用。
+- 生成 `README.md` 和 `ALLOY-SNAPSHOT.json`。记录包含 `U`、候选提交、exporter 文件哈希、包路径及文件内容、类型和执行位清单。记录本身不纳入自己的文件清单。
+
+上游的根 `[patch]`、profile、workspace metadata、Cargo 配置和工具链不会自动转移到消费方。消费方根配置和 `Cargo.lock` 决定外部依赖解析。需要沿用某项上游覆盖时，在消费方根显式配置，审查 lockfile 差异，再执行来源、构建和行为检查。不能把源码导出一致解释为依赖配置或构建行为完全等同上游。完整上游测试仍在 Alloy 仓库运行。
+
+在 Alloy 根目录设置以下变量。将 `ALLOY_CONSUMER` 改为隔离的消费方 workspace 根目录，并先保留该目录原有 vendor：
+
+```sh
+ALLOY_REPO="$(pwd)"
+ALLOY_U=4c841aaf1c4fa613e89a5d77096523d0ff593b56
+ALLOY_CANDIDATE=e1970b606ea086200bb077a9be23fc614d9df1f1
+ALLOY_CONSUMER=/absolute/path/to/isolated-consumer
+python3 script/gpui_snapshot.py export --upstream "$ALLOY_U" --revision "$ALLOY_CANDIDATE" --snapshot "$ALLOY_CONSUMER/vendor"
+```
+
+确认消费方 path 依赖指向新目录。需要调整 lockfile 时，仅在隔离工作区调整并审查 diff。随后在消费方已配置 Rust 工具链的 shell 中执行：
+
+```sh
+python3 "$ALLOY_REPO/script/gpui_snapshot.py" verify-consumer --upstream "$ALLOY_U" --revision "$ALLOY_CANDIDATE" --snapshot "$ALLOY_CONSUMER/vendor" --consumer "$ALLOY_CONSUMER" --target aarch64-apple-darwin
+```
+
+Cupertino 可从包含 `devenv.nix` 的目录使用 `devenv shell -- python3 ...` 执行同一命令。检查器先从指定 Git 提交重新导出并比较文件和来源记录，再即时运行 `cargo metadata --format-version 1 --locked --all-features`；`--target` 对应 `--filter-platform`，省略时检查全部 target 的解析图。检查器不接受以前保存的 metadata 作为当前验收依据。
+
+检查器遍历消费方所有 workspace member 的可达依赖，必须实际发现候选 `gpui`。每个可达的导出包名必须只有一个包身份，且来自对应候选目录的 path 依赖。检查器拒绝 registry、Git、旧 vendor 或其他路径的同名包；此规则也涵盖 `util`、`path`、`collections` 等名称。target 筛选后不要求全部 26 个包都可达。
+
+修改、缺失或额外文件都会导致来源检查失败。将构建输出放在消费方的 target 目录或导出目录之外。不要手改生成的 README 或向 vendor 添加额外说明文件；把消费方验收记录写入消费方的维护文档。
+
+保留生成时的 exporter 版本。检查器比较 exporter 文件哈希；工具更新后验证旧快照时，必须使用原版本并显式传入 `--repo` 指向保留 Git 对象的 Alloy 仓库。记录哈希不能替代长期保存提交和源码 tag。
+
+来源检查通过后，再执行该候选的 GPUI 检查、消费方 `devenv test` 和所需原生验收。全部验收完成前，候选 SHA 不能登记为可消费的 `D`。
+
+修改导出工具后，在 Alloy 根目录执行：
+
+```sh
+ruff format --check script/gpui_snapshot.py script/test_gpui_snapshot.py
+ruff check script/gpui_snapshot.py script/test_gpui_snapshot.py
+python3 -B -m unittest discover -s script -p test_gpui_snapshot.py -v
+```
+
 ## 验证和证据
 
 检查结果必须绑定确切提交和执行环境。记录 Rust 和 Cargo 的实际版本、target、features 和对应 lockfile；只写「stable」不能确定工具链版本。topic 改写、上游基线变化或冲突处理后，重新执行受影响检查，不复用旧 head 的通过状态。
@@ -183,7 +233,7 @@ Cupertino 当前消费方式是 path 依赖 `gpui`，并非 `gpui-pre`。后续�
 - 核对时的 Cupertino `HEAD` 为 `541d05454899085fcd8fc3b188344dc63002f8c3`，分支为 `feat/component-library`，并含尚未提交的组件和 vendor 改动。
 - 本地 `main` 和 `downstream/gpui` 已从上述 `U` 建立。初始化仅加入维护文档；GPUI 源码保持该基线。完整下游快照 `D` 和可消费快照 tag 尚未建立。
 - 现有 vendor 首次导入包含在 Cupertino 提交 `9c8b4e23c299006e2440eada4043dc1d04c2a750`；之后存在多次修改，不能把该提交当成当前完整快照。
-- 当前导出转换及逐文件清单尚未形成可重复执行的完整记录。首次迁移时必须补齐，不能宣称当前 vendor 已由某个 `D` 重现。
+- 原有 vendor 尚未由 Alloy 的固定 `D` 重现。现已提供候选导出工具；首次迁移仍须提取补丁、解释与原 vendor 的差异并完成两层验收。
 
 ### 已有上游 PR
 
@@ -298,3 +348,17 @@ git ls-remote origin refs/heads/main refs/heads/downstream/gpui 'refs/tags/archi
 GitHub Actions 已在仓库设置中关闭。上游 workflow 包含 Zed 的发布和服务任务；建立 Alloy 专用 CI 并核对触发条件后，再决定启用哪些 workflow。关闭 Actions 不免除本地验收要求。
 
 本次初始化只验收仓库可见性、Git 历史连通性、分支和归档目标、源码与 `U` 的一致性以及维护文档。没有执行 Alloy 的 GPUI 编译、单元测试或原生验收；没有发布 crate、可消费 tag 或新的上游 PR。
+
+## 导出工具验收记录
+
+2026-10-03：在 `chore/gpui-export` 实现导出与消费方来源检查，完成后合入本地 `main` 和 `downstream/gpui`。该工具属于 Alloy 维护设施，不是向 Zed 提交的 GPUI 行为补丁。
+
+- 受测来源：`U = 4c841aaf1c4fa613e89a5d77096523d0ff593b56`；候选 `e1970b606ea086200bb077a9be23fc614d9df1f1`。候选仍没有 Cupertino 的 9 项补丁。
+- exporter SHA-256：`fa10e78736b16d03c92c6740850a5845c18ffc21b101b61cb885da370831c000`。使用此文件版本和上述提交可重新生成验收输入。
+- 两次导出得到相同的 26 个 crate、409 个清单文件及来源记录。`ALLOY-SNAPSHOT.json` 的 SHA-256 为 `88dac2197eaa048ac9a8838a105c6333fc69683cc1afd7300843001c86b60c0a`。
+- Ruff 格式和 lint 通过。3 项回归测试通过，覆盖依赖闭包、脏工作区和本地 archive attributes 隔离、符号链接、执行位、文件篡改、额外文件、提交身份和混合来源拒绝。
+- 以 Cupertino 当前 workspace 的临时副本作为消费方，使用 Python 3.14.7、Rust 1.98.1、Cargo 1.98.1、`aarch64-apple-darwin`、全部 features 和 `--locked`，来源检查通过，实际核对 18 个配套 crate。
+- 初次检查因旧 lockfile 与候选 manifest 不匹配而失败。临时副本重新解析后仅移除 `gpui_apple` 对 `libm` 的依赖边；该依赖属于尚未迁入的 vendor 改动。受测 lockfile SHA-256 为 `1c49f003d32844662c4eeca95a76556d46fbfda923373fe97468560c7fdfcaa8`。原消费方 manifest、lockfile、vendor 和暂存内容保持不变。
+- 使用原消费方的解析图核对候选目录时，检查器正确拒绝仍指向原 vendor 的 `gpui_platform`。
+
+这些结果只验收导出工具和解析来源。本轮未执行候选 GPUI 编译、单元测试、Cupertino 行为测试或原生验收；未迁移补丁，未建立可消费 tag，未推送分支。
