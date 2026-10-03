@@ -53,6 +53,8 @@ GPUI has various system dependencies that it needs in order to work.
 
 #### macOS
 
+For `WindowKind::PopUp`, `titlebar: None` removes the native border and shadow. Use `Some(TitlebarOptions)` to retain native decoration. Normal windows keep their existing decoration behavior.
+
 On macOS, GPUI uses Metal for rendering. In order to use Metal, you need to do the following:
 
 - Install [Xcode](https://apps.apple.com/us/app/xcode/id497799835?mt=12) from the macOS App Store, or from the [Apple Developer](https://developer.apple.com/download/all/) website. Note this requires a developer account.
