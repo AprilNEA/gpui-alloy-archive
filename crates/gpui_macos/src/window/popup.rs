@@ -21,6 +21,8 @@ pub(super) struct MacPopup {
     pub options: PopupOptions,
     pub size: Size<Pixels>,
     pub parent: Retained<NSWindow>,
+    // AppKit can hide and detach a shown panel before an application deactivation notification.
+    pub show_requested: bool,
     parent_view: Retained<NSView>,
     observers: Vec<Retained<objc2::runtime::ProtocolObject<dyn NSObjectProtocol>>>,
     mouse_monitor: Option<Retained<AnyObject>>,
@@ -30,6 +32,7 @@ impl MacPopup {
     pub fn new(
         options: PopupOptions,
         size: Size<Pixels>,
+        show_requested: bool,
         marker: MainThreadMarker,
     ) -> Result<Self> {
         let application = NSApplication::sharedApplication(marker);
@@ -60,6 +63,7 @@ impl MacPopup {
                 options,
                 size,
                 parent,
+                show_requested,
                 parent_view,
                 observers: Vec::new(),
                 mouse_monitor: None,
@@ -143,7 +147,7 @@ impl MacPopup {
         if self.options.grab {
             let callback = RcBlock::new({
                 let state = Arc::downgrade(state);
-                move |_: NonNull<NSNotification>| dismiss(&state)
+                move |_: NonNull<NSNotification>| dismiss_if_shown(&state)
             });
             // SAFETY: AppKit posts application activation notifications on the main thread.
             let observer = unsafe {
@@ -159,7 +163,7 @@ impl MacPopup {
             // A nonactivating panel can open while its application is already inactive, in
             // which case an outside click does not cause a resign-active notification.
             let state = Arc::downgrade(state);
-            let callback = RcBlock::new(move |_: NonNull<NSEvent>| dismiss(&state));
+            let callback = RcBlock::new(move |_: NonNull<NSEvent>| dismiss_if_shown(&state));
             self.mouse_monitor = Some(
                 NSEvent::addGlobalMonitorForEventsMatchingMask_handler(
                     NSEventMask::LeftMouseDown
@@ -185,6 +189,20 @@ impl Drop for MacPopup {
             // SAFETY: These are our observer tokens, removed on the main thread.
             unsafe { center.removeObserver((*observer).as_ref()) };
         }
+    }
+}
+
+fn dismiss_if_shown(state: &Weak<Mutex<MacWindowState>>) {
+    let Some(window_state) = state.upgrade() else {
+        return;
+    };
+    let show_requested = window_state
+        .lock()
+        .popup
+        .as_ref()
+        .is_some_and(|popup| popup.show_requested);
+    if show_requested {
+        dismiss(state);
     }
 }
 

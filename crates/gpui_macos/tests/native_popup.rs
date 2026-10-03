@@ -16,9 +16,12 @@ mod native {
         WindowHandle, WindowKind, WindowOptions, div, point, popup::*, prelude::*, px, size,
     };
     use gpui_macos::MacPlatform;
-    use objc2::rc::Retained;
-    use objc2_app_kit::{NSEvent, NSEventModifierFlags, NSEventType, NSView, NSWindow};
-    use objc2_foundation::{NSPoint, NSString};
+    use objc2::{MainThreadMarker, rc::Retained};
+    use objc2_app_kit::{
+        NSApplication, NSApplicationDidResignActiveNotification, NSEvent, NSEventModifierFlags,
+        NSEventType, NSView, NSWindow,
+    };
+    use objc2_foundation::{NSNotificationCenter, NSPoint, NSString};
     use raw_window_handle::{HasWindowHandle, RawWindowHandle};
     use std::{rc::Rc, time::Duration};
 
@@ -50,6 +53,7 @@ mod native {
                     let tests = async {
                         hidden_popup_lifecycle(false, cx).await?;
                         hidden_popup_lifecycle(true, cx).await?;
+                        hidden_popup_survives_deactivation(cx).await?;
                         escape_dismissal(cx).await?;
                         anyhow::Ok(())
                     }
@@ -178,6 +182,53 @@ mod native {
             &characters, &characters, false, 53,
         ).context("could not construct Escape event")?;
         window.sendEvent(&event);
+        Ok(())
+    }
+
+    async fn hidden_popup_survives_deactivation(cx: &mut AsyncApp) -> Result<()> {
+        let parent = cx.update(|cx| open(WindowOptions::default(), cx))?;
+        let hidden = cx.update(|cx| {
+            open(
+                WindowOptions {
+                    show: false,
+                    ..popup_options(parent, true)
+                },
+                cx,
+            )
+        })?;
+        let native = native_window(hidden, cx)?;
+        let application = NSApplication::sharedApplication(
+            MainThreadMarker::new().context("native popup checks require the main thread")?,
+        );
+        let deactivate = || {
+            // SAFETY: The notification carries the live NSApplication on AppKit's main thread.
+            unsafe {
+                NSNotificationCenter::defaultCenter().postNotificationName_object(
+                    NSApplicationDidResignActiveNotification,
+                    Some(&application),
+                );
+            }
+        };
+        deactivate();
+        cx.spawn(async |_| {}).await;
+        ensure!(
+            cx.update(|cx| cx.windows().contains(&hidden.into())),
+            "application deactivation closed a popup before its first activation"
+        );
+        ensure!(!native.isVisible(), "deactivation showed a hidden popup");
+        hidden.update(cx, |_, window, _| window.activate_window())?;
+        cx.spawn(async |_| {}).await;
+        ensure!(native.isVisible(), "hidden popup could not be activated");
+        // AppKit can hide an NSPanel before the application deactivation notification.
+        native.orderOut(None);
+        deactivate();
+        cx.spawn(async |_| {}).await;
+        ensure!(
+            !cx.update(|cx| cx.windows().contains(&hidden.into())),
+            "application deactivation did not close the previously shown grabbing popup"
+        );
+        parent.update(cx, |_, window, _| window.remove_window())?;
+        cx.spawn(async |_| {}).await;
         Ok(())
     }
 
