@@ -109,6 +109,8 @@ Currently, the best way to learn about these APIs is to read the Zed source code
 
 `Window::paint_backdrop` samples the opaque SDR window content painted before the material, including across open paint layers and cached paint replay. The native Metal renderer supports this path; transparent windows, desktop sampling, and HDR/EDR are not supported.
 
+`Window::paint_continuous_quad` shares the material outline and edge coverage while retaining fractional device-pixel bounds. Continuous quads require equal corner radii and an optional uniform solid border.
+
 ## Inert subtrees
 
 Wrap content behind a modal boundary with `gpui::inert(content, true)`. The subtree retains its layout and painting while excluding input handlers, focus targets, platform text input, and accessibility nodes. Deferred children remain inert, and cached views rebuild registrations when the boundary changes. Application-global actions and persistent subscriptions remain the application’s responsibility.
