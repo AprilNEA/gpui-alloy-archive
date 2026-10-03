@@ -994,6 +994,7 @@ impl MacWindow {
         };
         let popup_frame = popup.as_ref().map(MacPopup::frame).transpose()?;
         let focus = popup.as_ref().map_or(focus, |popup| popup.options.grab);
+        let borderless = kind == WindowKind::PopUp && titlebar.is_none();
         unsafe {
             let pool = NSAutoreleasePool::new(nil);
 
@@ -1020,6 +1021,9 @@ impl MacWindow {
                 if titlebar.appears_transparent {
                     style_mask |= NSWindowStyleMask::NSFullSizeContentViewWindowMask;
                 }
+            } else if borderless {
+                // Hiding a titled panel's titlebar still leaves an AppKit-drawn border.
+                style_mask = NSWindowStyleMask::NSBorderlessWindowMask;
             } else {
                 style_mask = NSWindowStyleMask::NSTitledWindowMask
                     | NSWindowStyleMask::NSFullSizeContentViewWindowMask;
@@ -1097,6 +1101,9 @@ impl MacWindow {
                 target_screen,
             );
             assert!(!native_window.is_null());
+            if borderless {
+                native_window.setHasShadow_(NO);
+            }
             let () = msg_send![
                 native_window,
                 registerForDraggedTypes:

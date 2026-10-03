@@ -19,6 +19,11 @@ harness = false
 test = false
 required-features = ["test-support"]
 
+[[test]]
+name = "popup_decorations"
+harness = false
+test = false
+
 [features]
 default = ["gpui/default"]
 bench-support = ["gpui/bench-support", "gpui_apple/bench-support"]
