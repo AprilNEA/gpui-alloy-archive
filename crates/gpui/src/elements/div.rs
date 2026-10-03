@@ -2242,6 +2242,19 @@ impl Interactivity {
                     }
                 }
 
+                // A press cannot survive a frame without its click or drag handlers.
+                if self.click_listeners.is_empty()
+                    && let Some(element_state) = element_state.as_mut()
+                {
+                    element_state.pending_keyboard_down = None;
+                    if self.aux_click_listeners.is_empty()
+                        && self.drag_listener.is_none()
+                        && let Some(pending) = element_state.pending_mouse_down.as_ref()
+                    {
+                        pending.borrow_mut().take();
+                    }
+                }
+
                 // Ensure we store a focus handle in our element state if we're focusable.
                 // If there's an explicit focus handle we're tracking, use that. Otherwise
                 // create a new handle and store it in the element state, which lives for as
@@ -5284,6 +5297,7 @@ mod tests {
     /// Two focusable, clickable elements ("a" and "b") used to exercise the
     /// Enter/Space -> synthesized click press/release pairing.
     struct KeyboardActivationTest {
+        enabled_a: bool,
         focus_a: FocusHandle,
         focus_b: FocusHandle,
         clicks: Rc<RefCell<Vec<&'static str>>>,
@@ -5301,7 +5315,9 @@ mod tests {
                         .w(px(50.))
                         .h(px(50.))
                         .track_focus(&self.focus_a)
-                        .on_click(move |_, _, _| clicks_a.borrow_mut().push("a")),
+                        .when(self.enabled_a, |element| {
+                            element.on_click(move |_, _, _| clicks_a.borrow_mut().push("a"))
+                        }),
                 )
                 .child(
                     div()
@@ -5329,6 +5345,7 @@ mod tests {
             let focus_b = focus_b.clone();
             let clicks = clicks.clone();
             move |_, _| KeyboardActivationTest {
+                enabled_a: true,
                 focus_a,
                 focus_b,
                 clicks,
@@ -5382,6 +5399,91 @@ mod tests {
         key_down(&mut cx, window, "enter");
         key_up(&mut cx, window, "enter");
 
+        assert_eq!(*clicks.borrow(), vec!["a"]);
+    }
+
+    #[test]
+    fn keyboard_activation_is_cancelled_when_click_handlers_are_removed() {
+        for key in ["enter", "space"] {
+            let (mut cx, window, clicks, focus_a, _) = setup_keyboard_activation_test();
+            focus_and_draw(&mut cx, window, &focus_a);
+            key_down(&mut cx, window, key);
+            for enabled in [false, true] {
+                window
+                    .downcast::<KeyboardActivationTest>()
+                    .unwrap()
+                    .update(&mut cx, |view, _, cx| {
+                        view.enabled_a = enabled;
+                        cx.notify();
+                    })
+                    .unwrap();
+                cx.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+                    .unwrap();
+            }
+            key_up(&mut cx, window, key);
+            assert!(clicks.borrow().is_empty());
+
+            key_down(&mut cx, window, key);
+            key_up(&mut cx, window, key);
+            assert_eq!(*clicks.borrow(), vec!["a"]);
+        }
+    }
+
+    #[test]
+    fn pointer_activation_is_cancelled_when_click_handlers_are_removed() {
+        let (mut cx, window, clicks, focus_a, _) = setup_keyboard_activation_test();
+        focus_and_draw(&mut cx, window, &focus_a);
+        let position = point(px(10.), px(10.));
+        let press = |cx: &mut TestAppContext| {
+            cx.update_window(window, |_, window, cx| {
+                window.simulate_mouse_move(position, cx);
+                window.dispatch_event(
+                    MouseDownEvent {
+                        position,
+                        button: MouseButton::Left,
+                        modifiers: Default::default(),
+                        click_count: 1,
+                        first_mouse: false,
+                    }
+                    .to_platform_input(),
+                    cx,
+                );
+            })
+            .unwrap();
+        };
+        let release = |cx: &mut TestAppContext| {
+            cx.update_window(window, |_, window, cx| {
+                window.dispatch_event(
+                    MouseUpEvent {
+                        position,
+                        button: MouseButton::Left,
+                        modifiers: Default::default(),
+                        click_count: 1,
+                    }
+                    .to_platform_input(),
+                    cx,
+                );
+            })
+            .unwrap();
+        };
+        press(&mut cx);
+        for enabled in [false, true] {
+            window
+                .downcast::<KeyboardActivationTest>()
+                .unwrap()
+                .update(&mut cx, |view, _, cx| {
+                    view.enabled_a = enabled;
+                    cx.notify();
+                })
+                .unwrap();
+            cx.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
+                .unwrap();
+        }
+        release(&mut cx);
+        assert!(clicks.borrow().is_empty());
+
+        press(&mut cx);
+        release(&mut cx);
         assert_eq!(*clicks.borrow(), vec!["a"]);
     }
 
