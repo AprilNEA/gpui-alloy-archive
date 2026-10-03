@@ -2716,6 +2716,13 @@ impl Window {
         self.rendered_frame.scene.quads.clone()
     }
 
+    /// Returns backdrop primitives from the most recently rendered frame.
+    /// Bounds and masks are in scaled pixels, matching [`Self::painted_quads`].
+    #[cfg(all(target_os = "macos", any(test, feature = "test-support")))]
+    pub fn painted_backdrops(&self) -> Vec<crate::Backdrop> {
+        self.rendered_frame.scene.backdrops.clone()
+    }
+
     /// Returns the underlines in the most recently rendered frame's scene.
     #[cfg(any(test, feature = "test-support"))]
     pub fn painted_underlines(&self) -> Vec<Underline> {
@@ -4488,6 +4495,38 @@ impl Window {
         } else {
             vertical_band
         }
+    }
+
+    /// Paint a material over the window contents drawn so far, before its content.
+    ///
+    /// This creates a global ordering boundary, including inside [`Self::paint_layer`].
+    /// Only opaque macOS window backgrounds are currently supported. Parameters
+    /// must satisfy the requirements documented on [`crate::PaintBackdrop`].
+    #[cfg(target_os = "macos")]
+    pub fn paint_backdrop(&mut self, backdrop: crate::PaintBackdrop) {
+        self.invalidator.debug_assert_paint();
+        let scale_factor = self.scale_factor();
+        let content_mask = self.snapped_content_mask();
+        let opacity = self.element_opacity();
+        self.next_frame.scene.insert_primitive(crate::Backdrop {
+            order: 0,
+            scale_factor,
+            shape: backdrop.shape,
+            bounds: backdrop.bounds.scale(scale_factor),
+            content_mask,
+            corner_radius: backdrop.corner_radius.scale(scale_factor),
+            blur_sigma: backdrop.blur_sigma.scale(scale_factor),
+            tint: backdrop.tint,
+            saturation: backdrop.saturation,
+            brightness: backdrop.brightness,
+            refraction_amount: backdrop.refraction_amount.scale(scale_factor),
+            refraction_width: backdrop.refraction_width.scale(scale_factor),
+            direction_mix: backdrop.direction_mix,
+            dispersion: backdrop.dispersion.scale(scale_factor),
+            highlight: backdrop.highlight,
+            edge_bleed: backdrop.edge_bleed,
+            opacity,
+        });
     }
 
     /// Paint one or more quads into the scene for the next frame at the current stacking context.
