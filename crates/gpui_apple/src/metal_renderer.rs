@@ -1,3 +1,5 @@
+mod backdrop;
+
 use crate::metal_atlas::MetalAtlas;
 use anyhow::{Context as _, Result};
 use block2::RcBlock;
@@ -112,6 +114,7 @@ impl InstanceBufferPool {
 
 pub struct MetalRenderer {
     device: metal::Device,
+    backdrop: backdrop::BackdropRenderer,
     layer: Option<metal::MetalLayer>,
     is_apple_gpu: bool,
     is_unified_memory: bool,
@@ -161,8 +164,7 @@ impl MetalRenderer {
         // https://developer.apple.com/documentation/metal/managing-your-game-window-for-metal-in-macos
         layer.set_opaque(!transparent);
         layer.set_maximum_drawable_count(3);
-        // Allow texture reading for visual tests (captures screenshots without ScreenCaptureKit)
-        #[cfg(any(test, feature = "test-support"))]
+        // Ordered backdrop effects read the preceding framebuffer.
         layer.set_framebuffer_only(false);
         unsafe {
             let _: () = msg_send![&*layer, setAllowsNextDrawableTimeout: NO];
@@ -330,8 +332,12 @@ impl MetalRenderer {
         let core_video_texture_cache =
             CVMetalTextureCache::new(None, device.clone(), None).unwrap();
 
+        let backdrop = backdrop::BackdropRenderer::new(&device)
+            .expect("valid built-in backdrop Metal shaders");
+
         Self {
             device,
+            backdrop,
             layer,
             presents_with_transaction: false,
             is_apple_gpu,
@@ -679,6 +685,22 @@ impl MetalRenderer {
 
         for batch in scene.batches() {
             match batch {
+                PrimitiveBatch::Backdrop(index) => {
+                    command_encoder.end_encoding();
+                    self.backdrop.draw(
+                        &self.device,
+                        command_buffer,
+                        texture,
+                        viewport_size,
+                        &scene.backdrops[index],
+                    );
+                    command_encoder = new_command_encoder_for_texture(
+                        command_buffer,
+                        texture,
+                        viewport_size,
+                        None,
+                    );
+                }
                 PrimitiveBatch::Shadows(range) => {
                     self.draw_shadows(range, instance_bindings, viewport_size, command_encoder)
                 }

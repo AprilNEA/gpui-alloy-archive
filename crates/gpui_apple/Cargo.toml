@@ -31,6 +31,7 @@ derive_more.workspace = true
 etagere.workspace = true
 foreign-types.workspace = true
 image.workspace = true
+libm = "0.2.16"
 log.workspace = true
 metal.workspace = true
 objc.workspace = true
@@ -42,3 +43,15 @@ cbindgen.workspace = true
 
 [target.'cfg(target_os = "macos")'.dev-dependencies]
 gpui = { workspace = true, features = ["test-support"] }
+
+[[test]]
+name = "backdrop"
+required-features = ["test-support"]
+
+[[test]]
+name = "numeric_reference"
+required-features = ["test-support"]
+
+[[test]]
+name = "optical_reference"
+required-features = ["test-support"]
