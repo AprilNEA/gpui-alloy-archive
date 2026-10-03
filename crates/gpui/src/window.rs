@@ -962,6 +962,7 @@ pub(crate) struct TooltipRequest {
 }
 
 pub(crate) struct DeferredDraw {
+    inert: bool,
     current_view: EntityId,
     priority: usize,
     parent_node: DispatchNodeId,
@@ -1155,6 +1156,7 @@ enum InputModality {
 
 /// Holds the state for a specific window.
 pub struct Window {
+    pub(crate) inert: bool,
     pub(crate) handle: AnyWindowHandle,
     pub(crate) invalidator: WindowInvalidator,
     pub(crate) removed: bool,
@@ -2019,6 +2021,7 @@ impl Window {
         platform_window.map_window().unwrap();
 
         Ok(Window {
+            inert: false,
             handle,
             invalidator,
             removed: false,
@@ -2268,6 +2271,20 @@ impl Window {
         self.handle
     }
 
+    /// Return whether the current element scope excludes input and accessibility registration.
+    /// Floating hints may use this value to avoid appearing above a modal boundary.
+    pub fn is_inert(&self) -> bool {
+        self.inert
+    }
+
+    pub(crate) fn with_inert<R>(&mut self, inert: bool, f: impl FnOnce(&mut Self) -> R) -> R {
+        let previous = self.inert;
+        self.inert |= inert;
+        let result = f(self);
+        self.inert = previous;
+        result
+    }
+
     /// Mark the window as dirty, scheduling it to be redrawn on the next frame.
     pub fn refresh(&mut self) {
         if self.invalidator.not_drawing() {
@@ -2300,7 +2317,7 @@ impl Window {
 
     /// Move focus to the element associated with the given [`FocusHandle`].
     pub fn focus(&mut self, handle: &FocusHandle, cx: &mut App) {
-        if !self.focus_enabled || self.focus == Some(handle.id) {
+        if self.inert || !self.focus_enabled || self.focus == Some(handle.id) {
             return;
         }
 
@@ -3736,6 +3753,8 @@ impl Window {
                     )
                 };
                 self.next_frame.dispatch_tree.set_active_node(parent_node);
+                let previous_inert = self.inert;
+                self.inert = self.next_frame.deferred_draws[deferred_draw_ix].inert;
 
                 let prepaint_start = self.prepaint_index();
                 if let Some(mut element) = element {
@@ -3753,6 +3772,7 @@ impl Window {
                 let prepaint_end = self.prepaint_index();
                 self.next_frame.deferred_draws[deferred_draw_ix].prepaint_range =
                     prepaint_start..prepaint_end;
+                self.inert = previous_inert;
             }
 
             self.element_id_stack.clear();
@@ -3780,6 +3800,8 @@ impl Window {
                 .dispatch_tree
                 .set_active_node(deferred_draw.parent_node);
 
+            let previous_inert = self.inert;
+            self.inert = deferred_draw.inert;
             let paint_start = self.paint_index();
             let content_mask = deferred_draw.content_mask;
             if let Some(element) = deferred_draw.element.as_mut() {
@@ -3795,6 +3817,7 @@ impl Window {
             }
             let paint_end = self.paint_index();
             deferred_draw.paint_range = paint_start..paint_end;
+            self.inert = previous_inert;
         }
         self.next_frame.deferred_draws = deferred_draws;
         self.element_id_stack.clear();
@@ -3854,6 +3877,7 @@ impl Window {
                 [range.start.deferred_draws_index..range.end.deferred_draws_index]
                 .iter()
                 .map(|deferred_draw| DeferredDraw {
+                    inert: deferred_draw.inert,
                     current_view: deferred_draw.current_view,
                     parent_node: reused_subtree.refresh_node_id(deferred_draw.parent_node),
                     element_id_stack: deferred_draw.element_id_stack.clone(),
@@ -3950,6 +3974,9 @@ impl Window {
     /// Updates the cursor style at the platform level. This method should only be called
     /// during the paint phase of element drawing.
     pub fn set_cursor_style(&mut self, style: CursorStyle, hitbox: &Hitbox) {
+        if self.inert {
+            return;
+        }
         self.invalidator.debug_assert_paint();
         self.next_frame.cursor_styles.push(CursorStyleRequest {
             hitbox_id: Some(hitbox.id),
@@ -3962,6 +3989,9 @@ impl Window {
     /// `set_cursor_style`. This method should only be called during the paint
     /// phase of element drawing.
     pub fn set_window_cursor_style(&mut self, style: CursorStyle) {
+        if self.inert {
+            return;
+        }
         self.invalidator.debug_assert_paint();
         self.next_frame.cursor_styles.push(CursorStyleRequest {
             hitbox_id: None,
@@ -3974,9 +4004,11 @@ impl Window {
     pub fn set_tooltip(&mut self, tooltip: AnyTooltip) -> TooltipId {
         self.invalidator.debug_assert_prepaint();
         let id = TooltipId(post_inc(&mut self.next_tooltip_id.0));
-        self.next_frame
-            .tooltip_requests
-            .push(Some(TooltipRequest { id, tooltip }));
+        if !self.inert {
+            self.next_frame
+                .tooltip_requests
+                .push(Some(TooltipRequest { id, tooltip }));
+        }
         id
     }
 
@@ -4336,6 +4368,7 @@ impl Window {
         self.invalidator.debug_assert_prepaint();
         let parent_node = self.next_frame.dispatch_tree.active_node_id().unwrap();
         self.next_frame.deferred_draws.push(DeferredDraw {
+            inert: self.inert,
             current_view: self.current_view(),
             parent_node,
             element_id_stack: self.element_id_stack.clone(),
@@ -5157,7 +5190,9 @@ impl Window {
             content_mask,
             behavior,
         };
-        self.next_frame.hitboxes.push(hitbox.clone());
+        if !self.inert {
+            self.next_frame.hitboxes.push(hitbox.clone());
+        }
         hitbox
     }
 
@@ -5165,6 +5200,9 @@ impl Window {
     ///
     /// This method should only be called as part of the paint phase of element drawing.
     pub fn insert_window_control_hitbox(&mut self, area: WindowControlArea, hitbox: Hitbox) {
+        if self.inert {
+            return;
+        }
         self.invalidator.debug_assert_paint();
         self.next_frame.window_control_hitboxes.push((area, hitbox));
     }
@@ -5174,6 +5212,9 @@ impl Window {
     ///
     /// This method should only be called as part of the paint phase of element drawing.
     pub fn set_key_context(&mut self, context: KeyContext) {
+        if self.inert {
+            return;
+        }
         self.invalidator.debug_assert_paint();
         self.next_frame.dispatch_tree.set_key_context(context);
     }
@@ -5183,6 +5224,9 @@ impl Window {
     ///
     /// This method should only be called as part of the prepaint phase of element drawing.
     pub fn set_focus_handle(&mut self, focus_handle: &FocusHandle, _: &App) {
+        if self.inert {
+            return;
+        }
         self.invalidator.debug_assert_prepaint();
         if focus_handle.is_focused(self) {
             self.next_frame.focus = Some(focus_handle.id);
@@ -5247,6 +5291,9 @@ impl Window {
         input_handler: impl InputHandler,
         cx: &App,
     ) {
+        if self.inert {
+            return;
+        }
         self.invalidator.debug_assert_paint();
 
         if focus_handle.is_focused(self) {
@@ -5286,6 +5333,9 @@ impl Window {
         &mut self,
         mut listener: impl FnMut(&Event, DispatchPhase, &mut Window, &mut App) + 'static,
     ) {
+        if self.inert {
+            return;
+        }
         self.invalidator.debug_assert_paint();
 
         self.next_frame.mouse_listeners.push(Some(Box::new(
@@ -5309,6 +5359,9 @@ impl Window {
         &mut self,
         listener: impl Fn(&Event, DispatchPhase, &mut Window, &mut App) + 'static,
     ) {
+        if self.inert {
+            return;
+        }
         self.invalidator.debug_assert_paint();
 
         self.next_frame.dispatch_tree.on_key_event(Rc::new(
@@ -5330,6 +5383,9 @@ impl Window {
         &mut self,
         listener: impl Fn(&ModifiersChangedEvent, &mut Window, &mut App) + 'static,
     ) {
+        if self.inert {
+            return;
+        }
         self.invalidator.debug_assert_paint();
 
         self.next_frame.dispatch_tree.on_modifiers_changed(Rc::new(
@@ -6718,6 +6774,9 @@ impl Window {
         action_type: TypeId,
         listener: impl Fn(&dyn Any, DispatchPhase, &mut Window, &mut App) + 'static,
     ) {
+        if self.inert {
+            return;
+        }
         self.invalidator.debug_assert_paint();
 
         self.next_frame
@@ -6739,6 +6798,9 @@ impl Window {
         action_type: TypeId,
         listener: impl Fn(&dyn Any, DispatchPhase, &mut Window, &mut App) + 'static,
     ) {
+        if self.inert {
+            return;
+        }
         self.invalidator.debug_assert_paint();
 
         if condition {
@@ -6850,6 +6912,9 @@ impl Window {
         action: accesskit::Action,
         listener: impl FnMut(Option<&accesskit::ActionData>, &mut Window, &mut App) + 'static,
     ) {
+        if self.inert {
+            return;
+        }
         self.a11y
             .action_listeners
             .entry(node_id)
