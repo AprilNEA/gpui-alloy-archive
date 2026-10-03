@@ -2318,7 +2318,7 @@ impl App {
     /// Register a callback to be invoked when a keystroke is received by the application
     /// in any window. Note that this fires _before_ all other action and event mechanisms have resolved
     /// unlike [`App::observe_keystrokes`] which fires after. This means that `cx.stop_propagation` calls
-    /// within interceptors will prevent action dispatch
+    /// within interceptors prevent action dispatch and raw keyboard event handlers.
     pub fn intercept_keystrokes(
         &mut self,
         mut f: impl FnMut(&KeystrokeEvent, &mut Window, &mut App) + 'static,
