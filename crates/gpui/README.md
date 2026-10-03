@@ -42,6 +42,12 @@ The features on `gpui_platform` are platform-specific, so the list above is a sa
 
 - **Windows** — no features are required. Windowing uses Win32 and text uses DirectWrite. `font-kit` has no effect here.
 
+### Native anchored popups
+
+On macOS, `WindowKind::AnchoredPopup` creates a native child popup positioned from its parent's content coordinates. Grabbing popups accept keyboard focus and dismiss on unhandled Escape or application deactivation. Passive popups preserve parent focus. Closing the parent closes its popups.
+
+Run `cargo run -p gpui --example popup` to exercise placement, resizing, nested menus, and keyboard activation.
+
 ### Additional Topics
 
 - [Ownership and data flow](_ownership_and_data_flow)
