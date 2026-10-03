@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 //! Regression checks for backdrop ordering, active layers, and paint replay.
 #![cfg(target_os = "macos")]
 

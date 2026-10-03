@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 // macOS 26.4 (25E246), inactive Clear, scale 2. Colors are encoded display RGB.
 // Use eight evenly spaced row-major samples per unchanged native region, plus fixed chromatic witnesses.
 // These anchors supplement the complete 24-capture / 104-region research gate.

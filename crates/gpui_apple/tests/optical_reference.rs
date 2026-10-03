@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 //! Independent refraction-coordinate checks against quantized linear ramps.
 #![cfg(target_os = "macos")]
 

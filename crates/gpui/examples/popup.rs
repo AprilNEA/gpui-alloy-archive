@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 //! Native parent-anchored popups (macOS and Wayland).
 //! Run with `cargo run -p gpui --example popup`.
 //!

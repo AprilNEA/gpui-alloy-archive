@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 //! Requires a macOS graphical session. AppKit must run on the process's main thread,
 //! so this target uses its own harness rather than libtest's worker threads.
 //! Run with `cargo test -p gpui_macos --test popup_decorations`.

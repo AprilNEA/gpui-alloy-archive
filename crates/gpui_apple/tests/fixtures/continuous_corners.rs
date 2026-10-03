@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 // Measured on macOS 26.4 (25E246), scale 2, inactive Clear on black.
 // Each case retains 16 evenly spaced samples from the first image's
 // top-left fractional edge, in row-major order. Face color is the fixed central patch.

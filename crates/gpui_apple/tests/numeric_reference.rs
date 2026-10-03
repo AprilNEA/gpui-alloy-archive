@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 //! Independent SDR reference checks, not comparisons with Apple's private shaders.
 //!
 //! Captured pixels represent constant unit cells. The reference convolves those
