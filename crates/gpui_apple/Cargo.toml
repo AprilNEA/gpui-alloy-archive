@@ -59,3 +59,11 @@ required-features = ["test-support"]
 [[test]]
 name = "continuous_corners"
 required-features = ["test-support"]
+
+[[test]]
+name = "clear"
+required-features = ["test-support"]
+
+[[test]]
+name = "color_management"
+required-features = ["test-support"]

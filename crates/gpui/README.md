@@ -102,3 +102,5 @@ Currently, the best way to learn about these APIs is to read the Zed source code
 `Window::paint_backdrop` samples the opaque SDR window content painted before the material, including across open paint layers and cached paint replay. The native Metal renderer supports this path; transparent windows, desktop sampling, and HDR/EDR are not supported.
 
 `Window::paint_continuous_quad` shares the material outline and edge coverage while retaining fractional device-pixel bounds. Continuous quads require equal corner radii and an optional uniform solid border.
+
+`Window::paint_clear_backdrop` applies the inactive Clear recipe for the current window appearance, regardless of focus. The path requires an Apple GPU, Metal 3.1, an opaque SDR target, and RGB color profiles that support public ColorSync parametric conversion. The filter radius controls encoded-RGB mip filtering, not Gaussian sigma.

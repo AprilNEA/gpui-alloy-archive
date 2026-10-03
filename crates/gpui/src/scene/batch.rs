@@ -23,6 +23,8 @@ pub(crate) enum PrimitiveKind {
     Surface,
     #[cfg(target_os = "macos")]
     Backdrop,
+    #[cfg(target_os = "macos")]
+    ClearBackdrop,
 }
 
 #[cfg_attr(
@@ -57,6 +59,10 @@ pub(super) struct BatchIterator<'a> {
     backdrops_start: usize,
     #[cfg(target_os = "macos")]
     backdrops_iter: Peekable<slice::Iter<'a, Backdrop>>,
+    #[cfg(target_os = "macos")]
+    clear_backdrops_start: usize,
+    #[cfg(target_os = "macos")]
+    clear_backdrops_iter: Peekable<slice::Iter<'a, ClearBackdrop>>,
 }
 
 impl<'a> BatchIterator<'a> {
@@ -86,6 +92,10 @@ impl<'a> BatchIterator<'a> {
             backdrops_start: 0,
             #[cfg(target_os = "macos")]
             backdrops_iter: scene.backdrops.iter().peekable(),
+            #[cfg(target_os = "macos")]
+            clear_backdrops_start: 0,
+            #[cfg(target_os = "macos")]
+            clear_backdrops_iter: scene.clear_backdrops.iter().peekable(),
         }
     }
 }
@@ -99,6 +109,13 @@ impl<'a> Iterator for BatchIterator<'a> {
             (
                 self.backdrops_iter.peek().map(|backdrop| backdrop.order),
                 PrimitiveKind::Backdrop,
+            ),
+            #[cfg(target_os = "macos")]
+            (
+                self.clear_backdrops_iter
+                    .peek()
+                    .map(|backdrop| backdrop.order),
+                PrimitiveKind::ClearBackdrop,
             ),
             (
                 self.shadows_iter.peek().map(|s| s.order),
@@ -149,6 +166,13 @@ impl<'a> Iterator for BatchIterator<'a> {
                 self.backdrops_iter.next();
                 self.backdrops_start += 1;
                 Some(PrimitiveBatch::Backdrop(index))
+            }
+            #[cfg(target_os = "macos")]
+            PrimitiveKind::ClearBackdrop => {
+                let index = self.clear_backdrops_start;
+                self.clear_backdrops_iter.next();
+                self.clear_backdrops_start += 1;
+                Some(PrimitiveBatch::ClearBackdrop(index))
             }
             PrimitiveKind::Shadow => {
                 let shadows_start = self.shadows_start;
@@ -334,6 +358,8 @@ pub enum PrimitiveBatch {
     Surfaces(Range<usize>),
     #[cfg(target_os = "macos")]
     Backdrop(usize),
+    #[cfg(target_os = "macos")]
+    ClearBackdrop(usize),
 }
 
 impl PrimitiveBatch {
@@ -370,6 +396,8 @@ impl PrimitiveBatch {
             Self::Surfaces(range) => format!("surfaces ({})", range.len()),
             #[cfg(target_os = "macos")]
             Self::Backdrop(index) => format!("backdrop ({index})"),
+            #[cfg(target_os = "macos")]
+            Self::ClearBackdrop(index) => format!("clear backdrop ({index})"),
         }
     }
 }

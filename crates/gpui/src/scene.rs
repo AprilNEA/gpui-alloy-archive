@@ -16,7 +16,7 @@ use std::{
 #[cfg(target_os = "macos")]
 mod backdrop;
 #[cfg(target_os = "macos")]
-pub use backdrop::{Backdrop, PaintBackdrop};
+pub use backdrop::{Backdrop, ClearBackdrop, PaintBackdrop, PaintClearBackdrop};
 mod batch;
 use batch::BatchIterator;
 pub use batch::PrimitiveBatch;
@@ -52,6 +52,8 @@ pub struct Scene {
     max_order: DrawOrder,
     #[cfg(target_os = "macos")]
     pub backdrops: Vec<Backdrop>,
+    #[cfg(target_os = "macos")]
+    pub clear_backdrops: Vec<ClearBackdrop>,
     pub shadows: Vec<Shadow>,
     pub quads: Vec<Quad>,
     #[cfg(target_os = "macos")]
@@ -74,6 +76,8 @@ impl Scene {
         self.max_order = 0;
         #[cfg(target_os = "macos")]
         self.backdrops.clear();
+        #[cfg(target_os = "macos")]
+        self.clear_backdrops.clear();
         self.paths.clear();
         self.shadows.clear();
         self.quads.clear();
@@ -117,7 +121,7 @@ impl Scene {
         let bounds = match &primitive {
             // Keep analytic shapes when only their antialias fringe reaches the clip.
             #[cfg(target_os = "macos")]
-            Primitive::Backdrop(_) | Primitive::ContinuousQuad(_) => {
+            Primitive::Backdrop(_) | Primitive::ClearBackdrop(_) | Primitive::ContinuousQuad(_) => {
                 bounds.dilate(ScaledPixels(1.0))
             }
             _ => bounds,
@@ -130,7 +134,9 @@ impl Scene {
 
         let order = match &primitive {
             #[cfg(target_os = "macos")]
-            Primitive::Backdrop(_) | Primitive::ContinuousQuad(_) => self.start_material_epoch(),
+            Primitive::Backdrop(_) | Primitive::ClearBackdrop(_) | Primitive::ContinuousQuad(_) => {
+                self.start_material_epoch()
+            }
             _ => self
                 .layer_stack
                 .last()
@@ -142,6 +148,11 @@ impl Scene {
             Primitive::Backdrop(backdrop) => {
                 backdrop.order = order;
                 self.backdrops.push(*backdrop);
+            }
+            #[cfg(target_os = "macos")]
+            Primitive::ClearBackdrop(backdrop) => {
+                backdrop.order = order;
+                self.clear_backdrops.push(*backdrop);
             }
             Primitive::Shadow(shadow) => {
                 shadow.order = order;
@@ -262,6 +273,8 @@ pub enum Primitive {
     Surface(PaintSurface),
     #[cfg(target_os = "macos")]
     Backdrop(Backdrop),
+    #[cfg(target_os = "macos")]
+    ClearBackdrop(ClearBackdrop),
 }
 
 #[expect(missing_docs)]
@@ -280,6 +293,8 @@ impl Primitive {
             Primitive::Surface(surface) => &surface.bounds,
             #[cfg(target_os = "macos")]
             Primitive::Backdrop(backdrop) => &backdrop.bounds,
+            #[cfg(target_os = "macos")]
+            Primitive::ClearBackdrop(backdrop) => &backdrop.bounds,
         }
     }
 
@@ -297,6 +312,8 @@ impl Primitive {
             Primitive::Surface(surface) => &surface.content_mask,
             #[cfg(target_os = "macos")]
             Primitive::Backdrop(backdrop) => &backdrop.content_mask,
+            #[cfg(target_os = "macos")]
+            Primitive::ClearBackdrop(backdrop) => &backdrop.content_mask,
         }
     }
 }

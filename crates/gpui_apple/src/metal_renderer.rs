@@ -1,4 +1,6 @@
 mod backdrop;
+mod clear;
+mod color;
 
 use crate::metal_atlas::MetalAtlas;
 use anyhow::{Context as _, Result};
@@ -47,14 +49,20 @@ const MAX_INSTANCE_BUFFER_SIZE: usize = 256 * 1024 * 1024;
 pub type Context = Arc<Mutex<InstanceBufferPool>>;
 pub type Renderer = MetalRenderer;
 
+/// Create the renderer for a native window.
+///
+/// # Safety
+/// `native_window` must remain a live NSWindow for the lifetime of the renderer.
 pub unsafe fn new_renderer(
     context: self::Context,
-    _native_window: *mut c_void,
+    native_window: *mut c_void,
     _native_view: *mut c_void,
     _bounds: gpui::Size<f32>,
     transparent: bool,
 ) -> Renderer {
-    MetalRenderer::new(context, transparent)
+    let mut renderer = MetalRenderer::new(context, transparent);
+    renderer.native_window = native_window.cast();
+    renderer
 }
 
 pub struct InstanceBufferPool {
@@ -115,6 +123,9 @@ impl InstanceBufferPool {
 pub struct MetalRenderer {
     device: metal::Device,
     backdrop: backdrop::BackdropRenderer,
+    clear: Option<clear::ClearRenderer>,
+    color_context: Option<color::ColorContext>,
+    native_window: *mut objc::runtime::Object,
     layer: Option<metal::MetalLayer>,
     is_apple_gpu: bool,
     is_unified_memory: bool,
@@ -188,6 +199,12 @@ impl MetalRenderer {
     pub fn new_headless(instance_buffer_pool: Arc<Mutex<InstanceBufferPool>>) -> Self {
         let device = Self::create_device();
         Self::new_internal(device, None, true, instance_buffer_pool)
+    }
+
+    /// Check GPU color conversion against public ColorSync on standard RGB profiles.
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn verify_color_conversion() -> Result<()> {
+        color::tests::check_color_conversion()
     }
 
     fn create_device() -> metal::Device {
@@ -347,6 +364,9 @@ impl MetalRenderer {
         Self {
             device,
             backdrop,
+            clear: None,
+            color_context: None,
+            native_window: ptr::null_mut(),
             layer,
             presents_with_transaction: false,
             is_apple_gpu,
@@ -682,6 +702,35 @@ impl MetalRenderer {
         texture: &metal::TextureRef,
         viewport_size: Size<DevicePixels>,
     ) -> Result<metal::CommandBuffer> {
+        if !scene.clear_backdrops.is_empty() {
+            anyhow::ensure!(
+                self.is_apple_gpu && self.opaque,
+                "Clear requires an Apple GPU and an opaque SDR target"
+            );
+            if self.clear.is_none() {
+                self.clear = Some(clear::ClearRenderer::new(&self.device)?);
+            }
+        }
+        let color_spaces = if !scene.clear_backdrops.is_empty()
+            && let Some(layer) = self.layer.as_ref()
+        {
+            anyhow::ensure!(
+                !self.native_window.is_null(),
+                "layer-backed Clear requires its owning window"
+            );
+            // SAFETY: new_renderer's caller keeps the NSWindow alive; window rendering runs on its owning thread.
+            unsafe { color::ColorSpaces::for_window(self.native_window, layer)? }
+        } else {
+            None
+        };
+        if let Some(spaces) = &color_spaces
+            && self
+                .color_context
+                .as_ref()
+                .is_none_or(|context| context.spaces != *spaces)
+        {
+            self.color_context = Some(color::ColorContext::new(&self.device, spaces)?);
+        }
         let command_queue = self.command_queue.clone();
         let command_buffer = command_queue.new_command_buffer();
         let alpha = if self.opaque { 1. } else { 0. };
@@ -695,6 +744,47 @@ impl MetalRenderer {
 
         for batch in scene.batches() {
             match batch {
+                PrimitiveBatch::ClearBackdrop(index) => {
+                    let backdrop = &scene.clear_backdrops[index];
+                    if backdrop.opacity == 0.0 {
+                        continue;
+                    }
+                    command_encoder.end_encoding();
+                    let clear = self
+                        .clear
+                        .as_ref()
+                        .expect("Clear pipelines initialized for this scene");
+                    if color_spaces.is_some() {
+                        let context = self
+                            .color_context
+                            .as_ref()
+                            .expect("color context initialized for these spaces");
+                        let display = context.convert(
+                            &self.device,
+                            command_buffer,
+                            texture,
+                            color::Destination::Display,
+                        );
+                        let composite =
+                            color::texture(&self.device, &display, MTLPixelFormat::RGBA16Float);
+                        clear.draw(&self.device, command_buffer, &display, &composite, backdrop)?;
+                        let converted = context.convert(
+                            &self.device,
+                            command_buffer,
+                            &composite,
+                            color::Destination::Layer,
+                        );
+                        clear.finish(command_buffer, texture, &converted, backdrop)?;
+                    } else {
+                        clear.draw(&self.device, command_buffer, texture, texture, backdrop)?;
+                    }
+                    command_encoder = new_command_encoder_for_texture(
+                        command_buffer,
+                        texture,
+                        viewport_size,
+                        None,
+                    );
+                }
                 PrimitiveBatch::Backdrop(index) => {
                     command_encoder.end_encoding();
                     self.backdrop.draw(
