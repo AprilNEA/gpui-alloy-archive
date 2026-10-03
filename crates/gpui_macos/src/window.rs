@@ -988,7 +988,7 @@ impl MacWindow {
     ) -> Result<Self> {
         let mut popup = match &kind {
             WindowKind::AnchoredPopup(options) => {
-                Some(MacPopup::new(options.clone(), bounds.size, marker)?)
+                Some(MacPopup::new(options.clone(), bounds.size, show, marker)?)
             }
             _ => None,
         };
@@ -1834,9 +1834,12 @@ impl PlatformWindow for MacWindow {
     }
 
     fn activate(&self) {
-        let lock = self.0.lock();
+        let mut lock = self.0.lock();
         let window = lock.native_window;
-        let parent = lock.popup.as_ref().map(|popup| popup.parent.clone());
+        let parent = lock.popup.as_mut().map(|popup| {
+            popup.show_requested = true;
+            popup.parent.clone()
+        });
         let closed = lock.closed.clone();
         let executor = lock.foreground_executor.clone();
         executor
