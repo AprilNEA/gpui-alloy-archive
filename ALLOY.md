@@ -1,5 +1,7 @@
 # GPUI Alloy 维护规范与补丁台账
 
+当前本地可消费快照为 `gpui-alloy/20261003.1`，已导入 Cupertino。最新结果见[首个已验收快照](#首个已验收快照)；前文初始化与候选记录保留历史状态。
+
 GPUI Alloy 维护一份跟踪 Zed 的 GPUI 下游版本，同时把可通用的修改独立提交给上游。允许保留自有补丁，但每个补丁必须有来源、用途、依赖、验证结果和退出条件。消费方必须使用可重现的固定快照。
 
 本规范覆盖分支、补丁台账、上游 PR、同步、验证、分发和回退。仓库初始化不代表补丁已经迁移或快照可以消费。初始化状态、首次推送步骤和待迁移补丁见文末台账。
@@ -440,3 +442,77 @@ GPUI-001 至 GPUI-006 的上游等效行为进入新 U 后，移除重复补丁�
 
 
 2026-10-03 台账复核更正：独立主题检查不全部带 `--locked`，GPUI-005 的 7 次执行对应 6 个不同测试。上文已按原始命令和测试名称更正。该更正仅修改 `main` 的维护记录，不改变正在验收的候选源码。
+
+
+## 首个已验收快照
+
+2026-10-03：本地迁移完成。GPUI-001 至 GPUI-011 已集成、验收并正式导入 Cupertino。下列记录更新此前的候选状态；`main` 保存最新台账，固定 D 中的文档保留候选验收时刻的内容。验收后的记录更正没有改写 D 或快照 tag。
+
+| 引用 | 固定值 |
+| --- | --- |
+| 上游 U | `4c841aaf1c4fa613e89a5d77096523d0ff593b56` |
+| Alloy D | `19fc9968f689ccce2b9e31c2eb9a76ec442333dc` |
+| 快照 tag | `gpui-alloy/20261003.1`；附注 tag，未签名。 |
+| 当前 `downstream/gpui` | 与 D 相同；从原集成分支快进，未改写历史。 |
+| Cupertino 导入 V | `7d7989be3b0b4e06084ca3293372c55067a9cfc1`；父提交为 `c79bb253dd456877b61e1503ec4f2c549838a86e`。 |
+| 导出工具 SHA-256 | `fa10e78736b16d03c92c6740850a5845c18ffc21b101b61cb885da370831c000` |
+| 导出记录 SHA-256 | `465379119dbb45efd5dfd5335675a3ed6003337a1397f6dd091c0d6f96e58f63` |
+| Alloy `Cargo.lock` SHA-256 | `9ff58114305da0bf66438fe64c571a64bfd65c05422960a20d4f2b1f20ff0e20` |
+| Cupertino `Cargo.lock` SHA-256 | `9ae61f398a36a8f1f00329e7fc26abf9913ac797b2750437981e8545dbe7fef2`；本次未改变。 |
+
+本快照包含「补丁迁移记录」表中全部 11 项 topic 的改动，GPUI-010 同时包含其初次适配及隐藏弹窗后续修复。集成中的 Apache 修改声明提交为 `5a21f65e1d01e1668ae4683c48260df574c84c4d`，只增加 50 个文件的明确修改声明；该声明未进入上游主题分支。main 相对 U 的改动限于 Alloy 入口、台账、导出工具、格式配置和验收记录。
+
+### 固定 D 的验收结果
+
+实际平台为 macOS `26.4 (25E246)`、`aarch64-apple-darwin`、Apple M5 Max（40 GPU cores）、Xcode `26.6 (17F113)`、Rust `1.98.1 (48a229cea 2026-09-01)`、Cargo `1.98.1 (797e8a9bc 2026-08-05)`。桌面会话有两块 `2×` 显示器：2560 × 1440 logical pixels 的 DELL P3225QE，以及 1728 × 1117 的 Color LCD。该环境记录不表示验收跨屏迁移、混合 DPI 或真实窗口完整合成。
+
+以下命令均在固定 D 的完整 Zed workspace 执行，详细命令和输出保存在 [GPUI 组合日志](alloy-validation/20261003/gpui.txt)：
+
+```sh
+cargo fmt -p gpui -p gpui_apple -p gpui_macos -p gpui_wgpu --check
+./script/clippy -p gpui -p gpui_apple -p gpui_macos -p gpui_wgpu --locked
+cargo test -p gpui -p gpui_apple -p gpui_macos -p gpui_wgpu --lib --release --all-features --locked -- --test-threads=1
+cargo test -p gpui --test ordered_backdrop --release --all-features --locked
+cargo test -p gpui_apple --release --all-features --locked --test backdrop --test numeric_reference --test optical_reference --test continuous_corners --test clear --test color_management
+cargo test -p gpui_macos --test native_popup --test popup_decorations --release --all-features --locked
+cargo test -p gpui --example popup --release --all-features --locked
+cargo test -p gpui_apple --release --features test-support --locked --test continuous_corners
+```
+
+全部命令退出为 0。库测试分别为 GPUI 424、Apple 4、macOS 23、WGPU 40，共 491 项通过；scene 5 项、Metal 17 项、popup 示例 1 项通过，两项原生窗口 harness 通过。最后 3 项 continuous corner 执行使用预编译 metallib，补充全部 features 下的 runtime shader 路径。WGPU 的库检查不表示支持 Alloy 的 Metal 材质或验证了其他操作系统。
+
+默认并行的全部 features 库检查为 420 项通过、4 项失败；[原始失败日志](alloy-validation/20261003/gpui-parallel-failure.txt)保留。失败发生在 3 个 profiler 测试和 1 个 bench_context 测试：它们共享进程全局 `TRACE_STATE`、`FRAME_TIMINGS`，但不共享同一个测试锁。相关源码、features 和 nextest 配置与 U 完全相同。上游 [CI action](.github/actions/run_tests/action.yml) 使用 nextest，其[每测试独立进程机制](https://nexte.st/docs/design/why-process-per-test/)隔离这些全局变量。本次用标准 `cargo test -- --test-threads=1` 执行全部断言并通过，没有更改、跳过或放宽测试；没有在 U 上动态重现这 4 个并行失败，也没有将默认并行结果记为通过。
+
+U 的默认 features Spring 失败和独立主题记录分别保存在 [基线日志](alloy-validation/20261003/upstream-default-failure.txt)与[主题检查记录](alloy-validation/20261003/topic-checks.md)。已有 `block 0.1.6` future-incompatibility 提示仍在；消费方构建还显示上游 Cocoa 弃用提示。本轮没有为绕过验收新增 lint suppression；导入测试保留原有带理由的 `dead_code` allowance。
+
+### 导出与消费提交
+
+同一 D 导出 26 个 crate、436 个文件清单项。完整文件路径、摘要、执行位、符号链接与依赖路径保存在 V 的 `vendor/ALLOY-SNAPSHOT.json`；这些记录可由同一 exporter 重建。源码、资源、字体、许可证和完整 crate 目录随依赖闭包导出。许可证恢复上游符号链接并指向保留的根许可证；上游已有空白随源码原样保留。生成 workspace 的 lints 只有 TOML 表达形式改变，字段和值保持一致。原始根配置置于 `vendor/alloy-source/`，消费方不自动使用这些控制文件。
+
+三层消费方证据均已完成：
+
+1. 冻结的当前工作区副本：来源检查确认 18 个实际解析包来自 D；格式、Clippy 和 119 项测试通过，见[隔离工作区日志](alloy-validation/20261003/consumer-isolated.txt)。
+2. 原工作区正式导入后：来源检查仍为 18 个包；项目规定的 `devenv test` 退出为 0，见[正式工作区日志](alloy-validation/20261003/consumer-worktree.txt)。
+3. 只检出 V 的干净工作区：来源检查为 18 个包，格式、Clippy 和 64 项测试通过；检查前后 `git status --porcelain` 均为空，见[干净 V 日志](alloy-validation/20261003/consumer-commit.txt)。该证据不依赖尚未提交的组件工作。
+
+V 只提交 vendor 与 `docs/upstream-maintenance.md`。原有组件和其他文档的暂存 diff 保持 SHA-256 `866e25b09971ab69601bd8e6bf2a2fc8ce76bf4524a41e82f64c0b22d1e17619`。根 manifest 和 lockfile 均未修改。此前没有可消费 Alloy 快照；原 vendor 已固定在 V 的父提交中，作为本次回退来源。回退仍使用普通提交，保持已有快照 tag 不变。
+
+本轮保留上述平台限制：不验证 HDR/EDR、透明桌面采样、活动态 Clear、混合 DPI、跨屏实时迁移、完整 VoiceOver/IME 或原研究全套截图。GPUI-010 的失活观察器已通过原生回归；应用外鼠标回调使用同一门控，但没有单独合成其他应用的鼠标事件。上游接受状态未因本地验收发生改变。
+
+### 本地引用与推送
+
+以上分支、文档、tag 和导入提交均保存在本地；没有推送、创建 PR 或发布 crate。公开 GitHub 仓库的远端内容仍待维护人推送。原 PR 分支与 `archive/gpui-010/20261003-1`、`archive/gpui-011/20261003-1` 保留，未重写历史。
+
+在 Alloy 仓库由维护人执行以下明确引用列表，避免推送无关 Zed refs：
+
+```sh
+git push --atomic origin main downstream/gpui \
+  fix/gpui-cancel-pending-activation fix/gpui-interceptor-propagation \
+  test/gpui-accessibility-window fix/gpui-spring-clock feat/gpui-inert \
+  feat/gpui-autoscroll-on-focus feat/gpui-ordered-backdrop feat/gpui-continuous-quad \
+  local/gpui-inactive-clear local/gpui-010-native-popup local/gpui-011-popup-decorations \
+  refs/tags/archive/gpui-010/20261003-1 refs/tags/archive/gpui-011/20261003-1 \
+  refs/tags/gpui-alloy/20261003.1
+```
+
+Cupertino 当前没有 remote，导入提交位于 `feat/component-library`。维护人另行配置远端并推送。向 Zed 更新 PR 前仍须确认历史归档已推送、复核最新上游和原有 review，并完成人工审阅标记确认。
