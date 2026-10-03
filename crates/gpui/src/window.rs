@@ -1183,6 +1183,10 @@ pub struct Window {
     pub(crate) element_opacity: f32,
     pub(crate) content_mask_stack: Vec<ContentMask<Pixels>>,
     pub(crate) requested_autoscroll: Option<Bounds<Pixels>>,
+    // List consumes requested_autoscroll independently; focus reveal must remain scoped to opted-in Div subtrees.
+    pub(crate) requested_focus_reveal: Option<Bounds<Pixels>>,
+    pub(crate) focus_reveal_depth: usize,
+    pub(crate) revealed_focus_generation: u64,
     /// The [`TextInputConfiguration`] most recently forwarded to the platform
     /// window, so that only actual changes are forwarded (reconfiguring a live
     /// input session can restart the IME connection).
@@ -2044,6 +2048,9 @@ impl Window {
             content_mask_stack: Vec::new(),
             element_opacity: 1.0,
             requested_autoscroll: None,
+            requested_focus_reveal: None,
+            focus_reveal_depth: 0,
+            revealed_focus_generation: 0,
             last_text_input_configuration: None,
             focused_text_input_active: false,
             rendered_frame: Frame::new(DispatchTree::new(cx.keymap.clone(), cx.actions.clone())),
@@ -3291,6 +3298,7 @@ impl Window {
         debug_assert!(self.rendered_entity_stack.is_empty());
         self.invalidator.set_dirty(false);
         self.requested_autoscroll = None;
+        self.requested_focus_reveal = None;
 
         // Restore the previously-used input handler.
         // Place it back into a None slot (left by a previous .take()) so that
@@ -3310,7 +3318,10 @@ impl Window {
             }
         }
         if !cx.mode.skip_drawing() {
+            let focus_generation = self.focus_generation;
             self.draw_roots(cx);
+            // Prepaint transactions can retry. Consume the focus change only after the frame paints successfully.
+            self.revealed_focus_generation = focus_generation;
             #[cfg(feature = "profiler")]
             {
                 let viewport_size = self.viewport_size;
@@ -4085,8 +4096,10 @@ impl Window {
     pub fn transact<T, U>(&mut self, f: impl FnOnce(&mut Self) -> Result<T, U>) -> Result<T, U> {
         self.invalidator.debug_assert_prepaint();
         let index = self.prepaint_index();
+        let focus_reveal = self.requested_focus_reveal;
         let result = f(self);
         if result.is_err() {
+            self.requested_focus_reveal = focus_reveal;
             self.next_frame.hitboxes.truncate(index.hitboxes_index);
             self.next_frame
                 .tooltip_requests

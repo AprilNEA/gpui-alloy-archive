@@ -1792,6 +1792,7 @@ pub fn div() -> Div {
         prepaint_listener: None,
         image_cache: None,
         prepaint_order_fn: None,
+        autoscroll_on_focus: false,
     }
 }
 
@@ -1802,9 +1803,18 @@ pub struct Div {
     prepaint_listener: Option<Box<dyn Fn(Vec<Bounds<Pixels>>, &mut Window, &mut App) + 'static>>,
     image_cache: Option<Box<dyn ImageCacheProvider>>,
     prepaint_order_fn: Option<Box<dyn Fn(&mut Window, &mut App) -> SmallVec<[usize; 8]>>>,
+    autoscroll_on_focus: bool,
 }
 
 impl Div {
+    /// Reveal a newly focused descendant with the minimum scroll displacement.
+    /// Requires a tracked [`ScrollHandle`]. Wheel scrolling remains free until focus changes.
+    /// Nested containers resolve from inner to outer; geometry updates on the next frame.
+    pub fn autoscroll_on_focus(mut self) -> Self {
+        self.autoscroll_on_focus = true;
+        self
+    }
+
     /// Add a listener to be called when the children of this `Div` are prepainted.
     /// This allows you to store the [`Bounds`] of the children for later use.
     pub fn on_children_prepainted(
@@ -2010,6 +2020,11 @@ impl Element for Div {
             scroll_handle.scroll_to_active_item();
         }
 
+        let focus_scroll = self
+            .autoscroll_on_focus
+            .then(|| self.interactivity.tracked_scroll_handle.clone())
+            .flatten();
+
         self.interactivity.prepaint(
             global_id,
             inspector_id,
@@ -2024,6 +2039,10 @@ impl Element for Div {
                 }
 
                 window.with_image_cache(image_cache, |window| {
+                    let previous_focus_reveal = focus_scroll.as_ref().map(|_| {
+                        window.focus_reveal_depth += 1;
+                        window.requested_focus_reveal.take()
+                    });
                     window.with_element_offset(scroll_offset, |window| {
                         if let Some(order_fn) = &self.prepaint_order_fn {
                             let order = order_fn(window, cx);
@@ -2038,6 +2057,23 @@ impl Element for Div {
                             }
                         }
                     });
+
+                    if let Some(scroll_handle) = focus_scroll.as_ref() {
+                        window.focus_reveal_depth -= 1;
+                        if let Some(target) = window.requested_focus_reveal.take() {
+                            let old_offset = scroll_handle.offset();
+                            let new_target = scroll_handle.reveal_bounds(target);
+                            let visible_target = new_target.intersect(&bounds);
+                            window.requested_focus_reveal =
+                                (!visible_target.is_empty()).then_some(visible_target);
+                            if scroll_handle.offset() != old_offset {
+                                // Child geometry was already prepainted; a second frame applies all nested offsets.
+                                window.on_next_frame(|window, _| window.refresh());
+                            }
+                        } else {
+                            window.requested_focus_reveal = previous_focus_reveal.flatten();
+                        }
+                    }
 
                     if let Some(listener) = self.prepaint_listener.as_ref() {
                         listener(children_bounds, window, cx);
@@ -2319,6 +2355,14 @@ impl Interactivity {
 
         if let Some(focus_handle) = self.tracked_focus_handle.as_ref() {
             window.set_focus_handle(focus_handle, cx);
+
+            if !window.inert
+                && window.focus_reveal_depth > 0
+                && window.revealed_focus_generation != window.focus_generation
+                && focus_handle.is_focused(window)
+            {
+                window.requested_focus_reveal = Some(bounds);
+            }
 
             if window.a11y.is_active() && !window.inert {
                 if let Some(global_id) = global_id {
@@ -4264,6 +4308,49 @@ impl Default for ScrollHandle {
 }
 
 impl ScrollHandle {
+    fn reveal_bounds(&self, target: Bounds<Pixels>) -> Bounds<Pixels> {
+        fn displacement(start: Pixels, end: Pixels, minimum: Pixels, maximum: Pixels) -> Pixels {
+            if start >= minimum && end <= maximum || start <= minimum && end >= maximum {
+                Pixels::ZERO
+            } else if end - start > maximum - minimum {
+                if start < minimum {
+                    maximum - end
+                } else {
+                    minimum - start
+                }
+            } else if start < minimum {
+                minimum - start
+            } else {
+                maximum - end
+            }
+        }
+
+        let state = self.0.borrow();
+        let mut offset = state.offset.borrow_mut();
+        let previous = *offset;
+        if state.overflow.x == Overflow::Scroll {
+            offset.x = (offset.x
+                + displacement(
+                    target.left(),
+                    target.right(),
+                    state.bounds.left(),
+                    state.bounds.right(),
+                ))
+            .clamp(-state.max_offset.x, Pixels::ZERO);
+        }
+        if state.overflow.y == Overflow::Scroll {
+            offset.y = (offset.y
+                + displacement(
+                    target.top(),
+                    target.bottom(),
+                    state.bounds.top(),
+                    state.bounds.bottom(),
+                ))
+            .clamp(-state.max_offset.y, Pixels::ZERO);
+        }
+        Bounds::new(target.origin + (*offset - previous), target.size)
+    }
+
     /// Construct a new scroll handle.
     pub fn new() -> Self {
         Self(Rc::default())
@@ -5647,3 +5734,7 @@ mod tests {
         assert_eq!(bounds("cell-2").origin.x, px(300.));
     }
 }
+
+#[cfg(test)]
+#[path = "div/scroll_focus_tests.rs"]
+mod scroll_focus_tests;
