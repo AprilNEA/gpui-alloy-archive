@@ -2320,7 +2320,7 @@ impl Interactivity {
         if let Some(focus_handle) = self.tracked_focus_handle.as_ref() {
             window.set_focus_handle(focus_handle, cx);
 
-            if window.a11y.is_active() {
+            if window.a11y.is_active() && !window.inert {
                 if let Some(global_id) = global_id {
                     let node_id = global_id.accesskit_node_id();
                     window.a11y.set_focusable(node_id, focus_handle.id);
@@ -2338,7 +2338,7 @@ impl Interactivity {
             }
         }
 
-        if self.report_active_descendant_focus && window.a11y.is_active() {
+        if self.report_active_descendant_focus && window.a11y.is_active() && !window.inert {
             if let Some(global_id) = global_id {
                 window
                     .a11y
@@ -2353,6 +2353,19 @@ impl Interactivity {
                 let style = self.compute_style_internal(None, element_state.as_mut(), window, cx);
 
                 if let Some(element_state) = element_state.as_mut() {
+                    if window.inert {
+                        // Input suppressed between down and up must not activate after re-enabling.
+                        if let Some(pending) = &element_state.pending_keyboard_down {
+                            pending.borrow_mut().take();
+                        }
+                        if let Some(pending) = &element_state.pending_mouse_down {
+                            pending.borrow_mut().take();
+                        }
+                        if let Some(clicked) = &element_state.clicked_state {
+                            *clicked.borrow_mut() = ElementClickedState::default();
+                        }
+                        element_state.active_tooltip.take();
+                    }
                     if let Some(clicked_state) = element_state.clicked_state.as_ref() {
                         let clicked_state = clicked_state.borrow();
                         self.active = Some(clicked_state.element);
@@ -2550,7 +2563,9 @@ impl Interactivity {
                                         // sibling groups every container would then sort ahead of
                                         // every item, and `focus_next` from a container would jump
                                         // to the first item in the whole window instead of its own.
-                                        if let Some(focus_handle) = &self.tracked_focus_handle {
+                                        if let Some(focus_handle) = &self.tracked_focus_handle
+                                            && !window.inert
+                                        {
                                             window.next_frame.tab_stops.insert(focus_handle);
                                         }
                                         if let Some(hitbox) = hitbox {
@@ -2591,7 +2606,7 @@ impl Interactivity {
 
                                         self.paint_keyboard_listeners(window, cx);
 
-                                        if window.a11y.is_active() {
+                                        if window.a11y.is_active() && !window.inert {
                                             if let Some(global_id) = global_id {
                                                 if !self.a11y_action_listeners.is_empty() {
                                                     let node_id = global_id.accesskit_node_id();
