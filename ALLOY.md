@@ -541,3 +541,10 @@ Cupertino 当前没有 remote，导入提交位于 `feat/component-library`。�
 独立 topic 的原验收日志仍绑定原 SHA。本次只增加签名与映射后的父引用，依据逐提交 tree 和父拓扑等价检查继承独立 topic 的结果；未声称逐个 topic 重跑。组合 D 和消费 V 的结果则来自上述新 SHA 的实际执行。原始失败日志保留；本轮不重复默认并行 profiler 检查，也不将该检查记为通过。
 
 Cupertino 原有组件暂存 diff 的 SHA-256 仍为 `866e25b09971ab69601bd8e6bf2a2fc8ce76bf4524a41e82f64c0b22d1e17619`。其余未提交工作未纳入本次提交。推送目标经 GitHub API 核对为维护人具有管理权限的公开 `AprilNEA/gpui-alloy` 和 `AprilNEA/gpui-cupertino`；首次检查时两者均没有远端 refs。Cupertino 已配置同名仓库为 `origin`，推送仅包含 `feat/component-library` 及 `archive/pre-signing-20261003/gpui-import`。Alloy 推送 15 个自有工作分支和 19 个签名 tag，不推送或更新 Zed PR 分支。远端发布核对结果在推送后追加。
+
+
+### 首次远端发布核对
+
+2026-10-03：已按维护人授权完成推送。公开仓库 [AprilNEA/gpui-alloy](https://github.com/AprilNEA/gpui-alloy) 的 15 个工作分支与 19 个 tag，以及 [AprilNEA/gpui-cupertino](https://github.com/AprilNEA/gpui-cupertino/tree/feat/component-library) 的迁移分支与签名归档 tag，均已通过 `git ls-remote --refs` 与本地逐项比对。每个仓库使用明确引用列表进行原子推送，没有 force push。原始对象归档已可从远端获取。Alloy 默认分支为 `main`，维护文档保留在该分支；Cupertino 当前默认分支为 `feat/component-library`。
+
+GitHub API 对首次发布集合中的 38 个新签名提交和 20 个签名 tag 均返回 `verified: true`、`reason: valid`。完整远端引用和验证结果见 [publication.json](alloy-validation/20261003/publication.json)。该发布检查绑定 Alloy 首次推送的 `main = f7de8739ac5901454b0aa06a564e794c506dff90`；本段后续记录采用新的签名文档提交，不移动 D 或快照 tag。原始签名映射、旧验收证据和本次签名后的实际验收日志均已随主分支推送。Zed 原有 PR 未更新，Cupertino 的组件暂存工作未提交或推送。

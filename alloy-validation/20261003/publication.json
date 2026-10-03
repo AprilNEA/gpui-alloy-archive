@@ -1,0 +1,453 @@
+{
+  "date": "2026-10-03",
+  "alloy_remote": "https://github.com/AprilNEA/gpui-alloy.git",
+  "consumer_remote": "https://github.com/AprilNEA/gpui-cupertino.git",
+  "alloy_refs": {
+    "refs/heads/chore/gpui-export": "97f50b5f861048b8125758cbd33d5dbc465396b8",
+    "refs/heads/chore/gpui-migration-20261003": "d21987f81a013ec67945892506bcc6aae8a2db0f",
+    "refs/heads/downstream/gpui": "d21987f81a013ec67945892506bcc6aae8a2db0f",
+    "refs/heads/feat/gpui-autoscroll-on-focus": "445e4f9af7b6da4b3dcd52db4e0374a7a8a9942d",
+    "refs/heads/feat/gpui-continuous-quad": "91f103447160b013c67e74f60204f1dadd039b74",
+    "refs/heads/feat/gpui-inert": "d09c26a6bf798eccc23e277450e1e8614f088a50",
+    "refs/heads/feat/gpui-ordered-backdrop": "1f55d0eaf4b55a88316ee1b4fb30bdb9a564e5d0",
+    "refs/heads/fix/gpui-cancel-pending-activation": "9710df14519e1fedee1bdd8d16d57e712bcfb23c",
+    "refs/heads/fix/gpui-interceptor-propagation": "98c107d7bcc00df80a64ca68385aaf332943a99a",
+    "refs/heads/fix/gpui-spring-clock": "a1ab296fcd88f01900cc616d2b934564c95bf8c3",
+    "refs/heads/local/gpui-010-native-popup": "459b3648bf99f6cc5cd149a6d3e695bb476f3fec",
+    "refs/heads/local/gpui-011-popup-decorations": "02c9bcf88b50768302b3ba95ca1cc8f52d345576",
+    "refs/heads/local/gpui-inactive-clear": "271ec2547b5f81740cd1f1855ec647e50b98a852",
+    "refs/heads/main": "f7de8739ac5901454b0aa06a564e794c506dff90",
+    "refs/heads/test/gpui-accessibility-window": "0f31f3c56aa6cad679d2de3c36ec838d09610ea9",
+    "refs/tags/archive/gpui-010/20261003-1": "841805a4acaf9e4601bdd88dd94c3e9a1d26c91d",
+    "refs/tags/archive/gpui-011/20261003-1": "7a76e7bc182fe2b1cd740a2531b3d54b752baa68",
+    "refs/tags/archive/pre-signing-20261003/downstream/gpui": "37ae496a53e8d2794936cacfc9889548b41aee5a",
+    "refs/tags/archive/pre-signing-20261003/feat/gpui-autoscroll-on-focus": "63e41764b05776adffd2868a38e9f83deac5bdf8",
+    "refs/tags/archive/pre-signing-20261003/feat/gpui-continuous-quad": "8e69091faf7f65e9092d4d1610c8238c4106acb8",
+    "refs/tags/archive/pre-signing-20261003/feat/gpui-inert": "e8352a21b196dfc89cebfa4bda29559a8bc53226",
+    "refs/tags/archive/pre-signing-20261003/feat/gpui-ordered-backdrop": "79d85d00b932daa9d4827371383b275157bed0f2",
+    "refs/tags/archive/pre-signing-20261003/fix/gpui-cancel-pending-activation": "7c93745ce5f1a652fd0298fe445ccd156918c339",
+    "refs/tags/archive/pre-signing-20261003/fix/gpui-interceptor-propagation": "9a65460298a44b34e5fd473a94ce603ebecb4a38",
+    "refs/tags/archive/pre-signing-20261003/fix/gpui-spring-clock": "796826eb105360e245d38bc6d03acda2d6b3e3af",
+    "refs/tags/archive/pre-signing-20261003/local/gpui-010-native-popup": "16d54ebab99fd0cd63ce42bc2cf23791d221ecc6",
+    "refs/tags/archive/pre-signing-20261003/local/gpui-011-popup-decorations": "175abba4b1f8cf615c7222dc3ba1aece5a59b5fd",
+    "refs/tags/archive/pre-signing-20261003/local/gpui-inactive-clear": "fb6c84b1ba768b67d0a7465efa944203feac39c5",
+    "refs/tags/archive/pre-signing-20261003/main": "8661366f71f1f424b9b1b5814206a6e5ec5a3d1c",
+    "refs/tags/archive/pre-signing-20261003/tags/archive/gpui-010/20261003-1": "8c1610175e8bf25daaeaf38605e2c977f4a385c4",
+    "refs/tags/archive/pre-signing-20261003/tags/archive/gpui-011/20261003-1": "d9fef47fd8627c9c7c57beb94d657781edceff32",
+    "refs/tags/archive/pre-signing-20261003/tags/gpui-alloy/20261003.1": "73031b68fd65352d560488ba911820f81e136cba",
+    "refs/tags/archive/pre-signing-20261003/test/gpui-accessibility-window": "4a568d9cf3fc6e9d6a21d4ccc1a0307b9de47fac",
+    "refs/tags/gpui-alloy/20261003.1": "87e974154254c5e92ef3e37a0612ea9e3db0f34f"
+  },
+  "consumer_refs": {
+    "refs/heads/feat/component-library": "ea9cc093403f45a26f32d0ae415007fef95e3b09",
+    "refs/tags/archive/pre-signing-20261003/gpui-import": "0f34215f5a12f50108a5a8c37c5659803f646d0c"
+  },
+  "github_verification": [
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "0160c3b0efdd66a0139c7e513bac782137835a74",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "02c9bcf88b50768302b3ba95ca1cc8f52d345576",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "0eed1c8c15168e69669da536cd9afe656416724f",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "0f31f3c56aa6cad679d2de3c36ec838d09610ea9",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "1590bee3ffc62bd30a4c77d31210258ba5ccf862",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "1f55d0eaf4b55a88316ee1b4fb30bdb9a564e5d0",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "271ec2547b5f81740cd1f1855ec647e50b98a852",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "2b700eb4502f6e95226c9e5c4af5de26a8f2417b",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "39b18b3ad47d3aa1434f449d0e119aab5d8fc2ef",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "3d589407dd6dc4517c9b9880eeb293b91c9fb06a",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "445e4f9af7b6da4b3dcd52db4e0374a7a8a9942d",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "459b3648bf99f6cc5cd149a6d3e695bb476f3fec",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "5c8110941912a50b1c0cb2c6c4550b4db57a2af1",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "5e87d3b00505ca3b82fd80bacc2e89eced22c9b0",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "62874a50e593f2a1d207e71b7cc6fda10ae57e53",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "6e986fed451c9a0bce4869c2e4c279a93a51d51f",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "719b8f889e300689701d9452e46d842e3da9fb17",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "7308351e53d9cb905390cfe8ce07e164494413a3",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "7813ac967b97157a1dd4cfcc51b89405c060cb06",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "7ca95bac15c3acbe3a1e31df36506268893ae934",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "84375ad9508cedad382ac22205d6fb6874838533",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "91f103447160b013c67e74f60204f1dadd039b74",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "9710df14519e1fedee1bdd8d16d57e712bcfb23c",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "97f50b5f861048b8125758cbd33d5dbc465396b8",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "98c107d7bcc00df80a64ca68385aaf332943a99a",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "a1ab296fcd88f01900cc616d2b934564c95bf8c3",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "ada6d9a4cf71f85975a85c46264f17769b45bc3f",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "c3f8df6a4049a936cf8b9a6e10b07543afd476ea",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "d09c26a6bf798eccc23e277450e1e8614f088a50",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "d18eac8291ac04d5bf06dc397fd60f0340bef584",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "d21987f81a013ec67945892506bcc6aae8a2db0f",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "e04a419e29fdfba926e29a067217a02f13e743a1",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "e4339c0401cc1aaa7dafef3736b10cd3d2d83169",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "e4b35e47bcbdc95a32c9109d1f6657463401c7f2",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "commits",
+      "sha": "f7de8739ac5901454b0aa06a564e794c506dff90",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "841805a4acaf9e4601bdd88dd94c3e9a1d26c91d",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "7a76e7bc182fe2b1cd740a2531b3d54b752baa68",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "37ae496a53e8d2794936cacfc9889548b41aee5a",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "63e41764b05776adffd2868a38e9f83deac5bdf8",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "8e69091faf7f65e9092d4d1610c8238c4106acb8",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "e8352a21b196dfc89cebfa4bda29559a8bc53226",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "79d85d00b932daa9d4827371383b275157bed0f2",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "7c93745ce5f1a652fd0298fe445ccd156918c339",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "9a65460298a44b34e5fd473a94ce603ebecb4a38",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "796826eb105360e245d38bc6d03acda2d6b3e3af",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "16d54ebab99fd0cd63ce42bc2cf23791d221ecc6",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "175abba4b1f8cf615c7222dc3ba1aece5a59b5fd",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "fb6c84b1ba768b67d0a7465efa944203feac39c5",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "8661366f71f1f424b9b1b5814206a6e5ec5a3d1c",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "8c1610175e8bf25daaeaf38605e2c977f4a385c4",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "d9fef47fd8627c9c7c57beb94d657781edceff32",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "73031b68fd65352d560488ba911820f81e136cba",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "4a568d9cf3fc6e9d6a21d4ccc1a0307b9de47fac",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-alloy",
+      "kind": "tags",
+      "sha": "87e974154254c5e92ef3e37a0612ea9e3db0f34f",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-cupertino",
+      "kind": "commits",
+      "sha": "7bb5515bae5ab84db2360324a1bc8fc12ae6f1b4",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-cupertino",
+      "kind": "commits",
+      "sha": "a316fcf8ea2f9f4877f4f197bc6044b60619ffb9",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-cupertino",
+      "kind": "commits",
+      "sha": "ea9cc093403f45a26f32d0ae415007fef95e3b09",
+      "verified": true,
+      "reason": "valid"
+    },
+    {
+      "repository": "AprilNEA/gpui-cupertino",
+      "kind": "tags",
+      "sha": "0f34215f5a12f50108a5a8c37c5659803f646d0c",
+      "verified": true,
+      "reason": "valid"
+    }
+  ]
+}
