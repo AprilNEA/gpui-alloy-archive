@@ -362,3 +362,15 @@ GitHub Actions 已在仓库设置中关闭。上游 workflow 包含 Zed 的发�
 - 使用原消费方的解析图核对候选目录时，检查器正确拒绝仍指向原 vendor 的 `gpui_platform`。
 
 这些结果只验收导出工具和解析来源。本轮未执行候选 GPUI 编译、单元测试、Cupertino 行为测试或原生验收；未迁移补丁，未建立可消费 tag，未推送分支。
+
+
+## 补丁迁移进度
+
+2026-10-03：开始迁移 GPUI-001 至 GPUI-011。先保持初始 `U = 4c841aaf1c4fa613e89a5d77096523d0ff593b56`，将补丁迁移与升级上游基线分开验收。
+
+- 已执行当前 Cupertino 的 `devenv test`，结果通过。随后只提交现有 vendor 改动，固定来源为 `c79bb253dd456877b61e1503ec4f2c549838a86e`。组件和其他文档的暂存 diff 未改变；其 SHA-256 为 `866e25b09971ab69601bd8e6bf2a2fc8ce76bf4524a41e82f64c0b22d1e17619`。
+- 两个已有 PR 的初始主题提交分别为 `5bdf153ed7b10d248b7329692e694fbdf8a65031` 和 `cf6788274cc81fb1a297622ba4ee156da51e9753`；两者的原始创建基线均为 `70a74b8725fa39a4aa81eab4479f9055aa0d7078`。PR head 和原分支保持不变，在独立 `local/gpui-010-native-popup`、`local/gpui-011-popup-decorations` 分支适配本次下游基线；这不表示已解决 PR 对最新上游的冲突。
+- 上游基线的完整 GPUI 库测试得到 345 项通过、1 项失败，失败项为 `test_spring_animation_preserves_velocity_when_retargeted`。GPUI-004 修复后，完整库测试为 347 项通过、0 项失败；格式与目标 Clippy 均通过。
+- GPUI-004 的独立分支为 `fix/gpui-spring-clock`，topic head 为 `80222ec015a7ba381f3cd6bb95b35bc0476b15bf`，候选集成提交为 `f1342596bc312793bd9f92d84ca4f51274319ad3`。原始实现来自 Cupertino `ebba53ae60327ac0050d8f0be543642d90996dbb`，作者归属保留。
+
+其余主题正在独立迁移和验收。集成候选分支为 `chore/gpui-migration-20261003`；完整快照和正式消费方导入尚未完成。当前不能把候选分支作为可消费 `D`。
