@@ -2729,6 +2729,12 @@ impl Window {
         self.rendered_frame.scene.backdrops.clone()
     }
 
+    /// Returns Clear primitives from the most recently rendered frame.
+    #[cfg(all(target_os = "macos", any(test, feature = "test-support")))]
+    pub fn painted_clear_backdrops(&self) -> Vec<crate::ClearBackdrop> {
+        self.rendered_frame.scene.clear_backdrops.clone()
+    }
+
     /// Returns the underlines in the most recently rendered frame's scene.
     #[cfg(any(test, feature = "test-support"))]
     pub fn painted_underlines(&self) -> Vec<Underline> {
@@ -4533,6 +4539,31 @@ impl Window {
             edge_bleed: backdrop.edge_bleed,
             opacity,
         });
+    }
+
+    /// Paint inactive Clear glass over earlier opaque SDR window contents.
+    ///
+    /// Requires an Apple GPU. Creates the same paint-order boundary as
+    /// [`Self::paint_backdrop`] and inherits the current clip and opacity.
+    #[cfg(target_os = "macos")]
+    pub fn paint_clear_backdrop(&mut self, backdrop: crate::PaintClearBackdrop) {
+        self.invalidator.debug_assert_paint();
+        let scale_factor = self.scale_factor();
+        let content_mask = self.snapped_content_mask();
+        let opacity = self.element_opacity();
+        let appearance = self.appearance();
+        self.next_frame
+            .scene
+            .insert_primitive(crate::ClearBackdrop {
+                order: 0,
+                scale_factor,
+                bounds: backdrop.bounds.scale(scale_factor),
+                content_mask,
+                corner_radius: backdrop.corner_radius.scale(scale_factor),
+                blur_radius: backdrop.blur_radius.scale(scale_factor),
+                appearance,
+                opacity,
+            });
     }
 
     /// Paint one or more quads into the scene for the next frame at the current stacking context.
