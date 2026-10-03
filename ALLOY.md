@@ -374,3 +374,66 @@ GitHub Actions 已在仓库设置中关闭。上游 workflow 包含 Zed 的发�
 - GPUI-004 的独立分支为 `fix/gpui-spring-clock`，topic head 为 `80222ec015a7ba381f3cd6bb95b35bc0476b15bf`，候选集成提交为 `f1342596bc312793bd9f92d84ca4f51274319ad3`。原始实现来自 Cupertino `ebba53ae60327ac0050d8f0be543642d90996dbb`，作者归属保留。
 
 其余主题正在独立迁移和验收。集成候选分支为 `chore/gpui-migration-20261003`；完整快照和正式消费方导入尚未完成。当前不能把候选分支作为可消费 `D`。
+
+
+## 2026-10-03 补丁迁移记录
+
+本节更新前文的初始化状态。11 个主题已形成独立提交，并以 `cherry-pick -x` 集成到 `chore/gpui-migration-20261003`。独立主题的检查均已通过；此时组合验收和正式消费方导入仍待完成，尚不能将候选称为可消费快照。
+
+全部主题的维护人为 AprilNEA，原作者归属保留。固定迁移基线仍为 `U = 4c841aaf1c4fa613e89a5d77096523d0ff593b56`。GPUI-001 至 GPUI-005、GPUI-007 直接基于 U；GPUI-006、008、009 的功能依赖见表。GPUI-010 和 GPUI-011 在独立本地适配分支中移植到 U，原有 PR 分支及归档引用保持不变。独立主题不包含 Alloy 根 README、维护台账、导出工具或下游修改声明。
+
+| 补丁 | Alloy 本地主题分支 | 完整 topic head | 候选集成提交 | 功能依赖 | 上游状态（2026-10-03） |
+| --- | --- | --- | --- | --- | --- |
+| GPUI-001 | `fix/gpui-cancel-pending-activation` | `05dc2cf96a652c23ab1a54bfc5ba7e5f762c66e5` | `16ea6dbe73d2178cca758a51e1c78b8ff760938a` | 无 | 待提交 |
+| GPUI-002 | `fix/gpui-interceptor-propagation` | `46d1fe8255b73a46413d4fe579ec3504e7f38a66` | `014800185f549cd48fa637bb08e10fa29ae742ee` | 无 | 待提交 |
+| GPUI-003 | `test/gpui-accessibility-window` | `e334e7b64830121436cbffcca83521fd8c7173ef` | `568b91fc0116dd37bde7c1193e02b8d3d75264e2` | 无 | 待提交 |
+| GPUI-004 | `fix/gpui-spring-clock` | `80222ec015a7ba381f3cd6bb95b35bc0476b15bf` | `f1342596bc312793bd9f92d84ca4f51274319ad3` | 无 | 待提交 |
+| GPUI-005 | `feat/gpui-inert` | `e9a82d67908b5d4252538d1731e7a43df874b1ca` | `fb3f4bbf0e4c9d15e6f5c001d7069cb0e89be3b6` | 无 | 未讨论 |
+| GPUI-006 | `feat/gpui-autoscroll-on-focus` | `32bc7317a4e7a6bcc4b4d18121608c7d270ff451` | `38f3cb8a160f935981b1dfb8eaa15f32cf27e7f6` | GPUI-005：inert 与焦点边界 | 未讨论 |
+| GPUI-007 | `feat/gpui-ordered-backdrop` | `2387142b99ef39787f872e1d3a5925b259627b1d` | `ceeadeb87b62478a0637321c12357514b1baa161` | 无 | 未讨论 |
+| GPUI-008 | `feat/gpui-continuous-quad` | `a09b1d01f967f05b6c18fdb93d70dd625b17c07d` | `f3f16428802dfa05e504228129ad8e7eded4eafe` | GPUI-007：有序 batch 与共享轮廓 | 未讨论 |
+| GPUI-009 | `local/gpui-inactive-clear` | `ae2f53dcf6e8a25e933c695fbe7bc30079a04832` | `d789e210b800563d60708d666bc17a3458534713` | GPUI-007、GPUI-008：材质与连续轮廓 | 仅自用 |
+| GPUI-010 | `local/gpui-010-native-popup` | `225e82553c278211ff44bff3bca5d0f7d1fefb3f` | `81c7314a8aa8732d079d67f47aaed50f0d96907e`<br>`3141bcb75920e9c005d82bc43d3df9420dbc2d43` | 无 | 已有 PR 开放；本地追加修复尚未提交到 PR |
+| GPUI-011 | `local/gpui-011-popup-decorations` | `3b714e845fa473ad53cb299653a38696cd6e2f1e` | `88f74325abc1ac3e202944d153b2fc03dec301a5` | 无 | 已有 PR 开放 |
+
+这些引用目前只保存在本地 Alloy 仓库，尚未推送到 `origin` 或贡献 fork。向 Zed 提交时，在 `AprilNEA/zed` 推送相应纯主题分支。GPUI-006、008 的依赖尚未被上游接受，不能假定维护者允许堆叠 PR。GPUI-009 保留为仅自用主题。既有 PR 的适配分支不能代替其原始分支或表示 PR 已更新。
+
+### 来源与迁移差异
+
+- GPUI-001 的键盘实现来自 Cupertino `ef5d17f00df73cab140b071ff23ee220738b6aff`，鼠标实现来自 `c79bb253dd456877b61e1503ec4f2c549838a86e`。GPUI-002、005、006 来自后一个固定提交。
+- GPUI-003 来自 Cupertino `1eb328bca34ca7c51426e9472110d04111aee385`。GPUI-004 来自 `ebba53ae60327ac0050d8f0be543642d90996dbb`。
+- GPUI-007 来自 Cupertino `9c8b4e23c299006e2440eada4043dc1d04c2a750` 和 `ebba53ae60327ac0050d8f0be543642d90996dbb`。GPUI-008、009 来自 `be245ff8b0d15db9e9b4e90b64ffd90fcd2788b6`。
+- GPUI-010 的移植来源为既有 PR head `619d4b2b3da3040e61c027a394aa5417123e92d0`，本地首个适配提交为 `f00547a0b37e8a6b56cf18652377d8053b382d02`。该移植使用当前 PR base `6872711ff860c18e3d44a0171105273b6717ee15` 计算差异；两项既有 PR 的原始创建基线均为 `70a74b8725fa39a4aa81eab4479f9055aa0d7078`。两种基线不可混用。
+- GPUI-011 的移植来源为既有 PR head `22df6ff9402b46943d5948e767b4c7ad493d69c3`。原 PR 分支没有重写，本轮没有更新其 review 或 CI 状态。
+- GPUI-010 在迁移审阅中新增 `show_requested` 生命周期状态：尚未显式显示的抓取型弹窗忽略应用失活及应用外鼠标关闭，父窗口关闭仍清理弹窗。显式显示后，即使 AppKit 先隐藏和移除父子关系，失活仍关闭弹窗。新原生回归先证实旧实现失败，再验证修复通过。应用外鼠标通知没有单独合成，使用同一状态门控。
+- 冻结 vendor 的 266 个生产源码和构建输入文件已核对，没有缺失路径。全部原有生产行为均保留；新增差异为两个 macOS 主题、GPUI-010 后续修复、独立 GPUI 回归测试、API 文档、格式及下游修改声明。`Cargo.lock` 相对 U 只增加 `gpui_apple -> libm` 依赖边，没有升级依赖版本。
+- GPUI-010 与 GPUI-011 在 `MacWindow::new` 合并时保留可失败的锚定弹窗初始化及无标题 PopUp 的 borderless/shadow 行为。多个 README 章节冲突均保留两方内容，其余相邻源码自动合并后再次核对。
+- GPUI-005 的早期提交使用 `Patch-ID: GPUI-005` trailer；其他主题使用 `GPUI-Patch`。保留该历史，表格明确两端映射；后续提交统一使用 `GPUI-Patch`。
+
+独立主题是在固定迁移基线上验收。核对时的上游引用为 `a84689073d296dfd39987bc7dd478e43ef76d83a`；GPUI-001 至 GPUI-006 的相应实现仍未出现。新 PR 提交前仍须在最新上游复核适用性；本轮没有升级 U 或解决已有 PR 相对最新上游的冲突。
+
+### 独立主题检查
+
+检查使用 Cupertino 的固定 devenv 环境，Rust `1.98.1 (48a229cea 2026-09-01)`、Cargo `1.98.1 (797e8a9bc 2026-08-05)`、`aarch64-apple-darwin`，使用完整 Zed workspace 及 `--locked`。Rust 源码格式和 `./script/clippy` 均通过；Clippy 脚本检查 release、全部 targets、全部 features，并拒绝 warning。脚本内可选的 cargo-shear 未安装，不属于本次 Rust 验收。
+
+| 补丁 | 实际行为检查 |
+| --- | --- |
+| GPUI-001 | `cargo test -p gpui --lib --release --locked elements::div::tests::`：27 项通过，含键盘和鼠标 handler 移除、恢复。 |
+| GPUI-002 | 同一命令筛选 `key_dispatch::tests::`：23 项通过，含 interceptor 消费和允许传播的 raw capture/bubble。 |
+| GPUI-003 | 同一命令筛选 `platform_accessibility_activation_and_actions_reach_the_rendered_view`：1 项通过。 |
+| GPUI-004 | `cargo test -p gpui --lib --release --locked`：347 项通过。未修复 U 为 345 项通过、1 项 Spring retargeting 失败。 |
+| GPUI-005 | `--all-features` 下的 inert、input、deferred 检查：7 项通过，覆盖缓存、延迟绘制、焦点、输入和 accessibility 注册。 |
+| GPUI-006 | `--all-features` 下的 focus、inert、input 检查：11 项通过，含 5 项独立 focus reveal 回归。 |
+| GPUI-007 | `ordered_backdrop` 的 5 项 scene 检查和 `gpui_apple` 的 11 项 native Metal 检查通过。 |
+| GPUI-008 | 5 项 scene、14 项 native Metal 检查通过；另有 3 项 continuous corner 检查在不启用 `runtime_shaders` 的预编译路径通过。 |
+| GPUI-009 | 5 项 scene、17 项 native Metal 检查通过，含 Clear 固定样本和 public ColorSync CPU/GPU 对照。 |
+| GPUI-010 | 20 项 macOS 单元测试、完整 `native_popup` 原生 harness 和 popup 示例测试通过；后续修复再次通过 20 项单元测试及原生 harness。 |
+| GPUI-011 | 7 项 macOS 单元测试和 `popup_decorations` 原生 harness 通过，覆盖普通、带标题和无标题 popup 的边框/阴影。 |
+
+除 GPUI-004 外，小主题不混入 Spring 修复来掩盖 U 的已知完整测试失败；最终组合验收包含 GPUI-004。跨 worktree 共享构建目录曾复用旧 `gpui_apple` build-script，导致 shader 输入不匹配；清理该包的 release 产物后，用原命令重跑通过，没有源码环境绕过或断言放宽。
+
+### 保留范围与退出条件
+
+GPUI-001 至 GPUI-006 的上游等效行为进入新 U 后，移除重复补丁并重跑对应回归。GPUI-007、008 在上游接受平台契约和成本后再提交；当前 WGPU 路径明确拒绝相关材质。GPUI-009 保留至 Cupertino 不再需要该效果或上游提供等效受支持能力，再评估退出。GPUI-010、011 在各自 PR 合并且新 U 包含本地所需行为后退休；不能仅因 PR 合并撤销新 U 的修复。
+
+渲染支持范围仍为原生 macOS Metal 的不透明 SDR 窗口内容。Inactive Clear 还要求 Apple GPU、Metal 3.1 和可通过 public ColorSync 参数化的 RGB 配置。未验证透明桌面采样、HDR/EDR、活动态 Clear、混合 DPI、跨显示器实时迁移、完整 VoiceOver 或原生 IME。固定像素参照沿用原研究数据，本轮不宣称重跑全部历史 24 次抓取与 104 个区域检查。

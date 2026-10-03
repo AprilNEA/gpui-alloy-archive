@@ -9,7 +9,7 @@ Alloy retains the complete Zed repository and history. GPUI crates keep their up
 
 ## Status
 
-Repository initialization and source export tooling are complete locally. The Cupertino patches have not been migrated, and no validated Alloy snapshot is available. Keep using the existing Cupertino vendor until a snapshot passes both GPUI and consumer checks.
+Eleven patch topics are tracked on independent branches. Use only a snapshot that passed both GPUI and consumer checks. See the current validation state and fixed commit identifiers in [ALLOY.md](ALLOY.md).
 
 The default branch, `main`, contains the project README and maintenance ledger. The integration branch is `downstream/gpui`. Unmodified Zed commits are tracked through `upstream/main`. Existing upstream pull requests remain in [AprilNEA/zed](https://github.com/AprilNEA/zed).
 
