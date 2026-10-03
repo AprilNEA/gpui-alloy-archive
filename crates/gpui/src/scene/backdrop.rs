@@ -1,5 +1,50 @@
 use super::{DrawOrder, Primitive, Scene};
-use crate::{Bounds, ContentMask, Pixels, ScaledPixels};
+use crate::{Bounds, ContentMask, Pixels, ScaledPixels, WindowAppearance};
+
+/// An inactive Clear material over earlier opaque SDR window contents.
+///
+/// The blur radius controls the encoded-RGB mip filter, not a Gaussian sigma.
+/// Parameters must be finite, radii nonnegative, and scale positive. Texture
+/// dimensions and shader coordinates must fit the Metal device's limits.
+#[derive(Clone, Copy, Debug)]
+pub struct ClearBackdrop {
+    /// Draw order assigned by the scene.
+    pub order: DrawOrder,
+    /// Device pixels per logical pixel.
+    pub scale_factor: f32,
+    /// Material bounds in device pixels.
+    pub bounds: Bounds<ScaledPixels>,
+    /// Output clipping; source sampling is independent of this mask.
+    pub content_mask: ContentMask<ScaledPixels>,
+    /// Continuous corner radius in device pixels.
+    pub corner_radius: ScaledPixels,
+    /// Filter radius in device pixels.
+    pub blur_radius: ScaledPixels,
+    /// Appearance used for the inactive Clear face color.
+    pub appearance: WindowAppearance,
+    /// Effective opacity of the element and its ancestors.
+    pub opacity: f32,
+}
+
+/// Logical-pixel inputs for [`crate::Window::paint_clear_backdrop`].
+///
+/// Requires an Apple GPU and an opaque SDR window. The material uses the
+/// window's appearance and the inactive Clear recipe, regardless of focus.
+#[derive(Clone, Copy, Debug)]
+pub struct PaintClearBackdrop {
+    /// Material bounds in logical pixels.
+    pub bounds: Bounds<Pixels>,
+    /// Finite, nonnegative continuous corner radius.
+    pub corner_radius: Pixels,
+    /// Finite, nonnegative filter radius; this is not a Gaussian sigma.
+    pub blur_radius: Pixels,
+}
+
+impl From<ClearBackdrop> for Primitive {
+    fn from(backdrop: ClearBackdrop) -> Self {
+        Self::ClearBackdrop(backdrop)
+    }
+}
 
 /// A material sampling the window contents painted before this primitive.
 ///
