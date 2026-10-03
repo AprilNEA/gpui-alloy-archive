@@ -414,7 +414,7 @@ GitHub Actions 已在仓库设置中关闭。上游 workflow 包含 Zed 的发�
 
 ### 独立主题检查
 
-检查使用 Cupertino 的固定 devenv 环境，Rust `1.98.1 (48a229cea 2026-09-01)`、Cargo `1.98.1 (797e8a9bc 2026-08-05)`、`aarch64-apple-darwin`，使用完整 Zed workspace 及 `--locked`。Rust 源码格式和 `./script/clippy` 均通过；Clippy 脚本检查 release、全部 targets、全部 features，并拒绝 warning。脚本内可选的 cargo-shear 未安装，不属于本次 Rust 验收。
+检查使用 Cupertino 的固定 devenv 环境，Rust `1.98.1 (48a229cea 2026-09-01)`、Cargo `1.98.1 (797e8a9bc 2026-08-05)`、`aarch64-apple-darwin`，使用完整 Zed workspace。测试命令除 GPUI-007 初次 scene 检查外均带 `--locked`；GPUI-010 首次检查与 GPUI-011 的 Clippy 命令未带 `--locked`。最终组合统一使用 `--locked`。Rust 源码格式和 `./script/clippy` 均通过；Clippy 脚本检查 release、全部 targets、全部 features，并拒绝 warning。脚本内可选的 cargo-shear 未安装，不属于本次 Rust 验收。
 
 | 补丁 | 实际行为检查 |
 | --- | --- |
@@ -422,7 +422,7 @@ GitHub Actions 已在仓库设置中关闭。上游 workflow 包含 Zed 的发�
 | GPUI-002 | 同一命令筛选 `key_dispatch::tests::`：23 项通过，含 interceptor 消费和允许传播的 raw capture/bubble。 |
 | GPUI-003 | 同一命令筛选 `platform_accessibility_activation_and_actions_reach_the_rendered_view`：1 项通过。 |
 | GPUI-004 | `cargo test -p gpui --lib --release --locked`：347 项通过。未修复 U 为 345 项通过、1 项 Spring retargeting 失败。 |
-| GPUI-005 | `--all-features` 下的 inert、input、deferred 检查：7 项通过，覆盖缓存、延迟绘制、焦点、输入和 accessibility 注册。 |
+| GPUI-005 | `--all-features` 下的 inert、input、deferred 检查：4 + 2 + 1 次执行通过，共 6 个不同测试；text-input 检查在前两轮重复执行。覆盖缓存、延迟绘制、焦点、输入和 accessibility 注册。 |
 | GPUI-006 | `--all-features` 下的 focus、inert、input 检查：11 项通过，含 5 项独立 focus reveal 回归。 |
 | GPUI-007 | `ordered_backdrop` 的 5 项 scene 检查和 `gpui_apple` 的 11 项 native Metal 检查通过。 |
 | GPUI-008 | 5 项 scene、14 项 native Metal 检查通过；另有 3 项 continuous corner 检查在不启用 `runtime_shaders` 的预编译路径通过。 |
@@ -437,3 +437,6 @@ GitHub Actions 已在仓库设置中关闭。上游 workflow 包含 Zed 的发�
 GPUI-001 至 GPUI-006 的上游等效行为进入新 U 后，移除重复补丁并重跑对应回归。GPUI-007、008 在上游接受平台契约和成本后再提交；当前 WGPU 路径明确拒绝相关材质。GPUI-009 保留至 Cupertino 不再需要该效果或上游提供等效受支持能力，再评估退出。GPUI-010、011 在各自 PR 合并且新 U 包含本地所需行为后退休；不能仅因 PR 合并撤销新 U 的修复。
 
 渲染支持范围仍为原生 macOS Metal 的不透明 SDR 窗口内容。Inactive Clear 还要求 Apple GPU、Metal 3.1 和可通过 public ColorSync 参数化的 RGB 配置。未验证透明桌面采样、HDR/EDR、活动态 Clear、混合 DPI、跨显示器实时迁移、完整 VoiceOver 或原生 IME。固定像素参照沿用原研究数据，本轮不宣称重跑全部历史 24 次抓取与 104 个区域检查。
+
+
+2026-10-03 台账复核更正：独立主题检查不全部带 `--locked`，GPUI-005 的 7 次执行对应 6 个不同测试。上文已按原始命令和测试名称更正。该更正仅修改 `main` 的维护记录，不改变正在验收的候选源码。
