@@ -46,6 +46,8 @@ The features on `gpui_platform` are platform-specific, so the list above is a sa
 
 On macOS, `WindowKind::AnchoredPopup` creates a native child popup positioned from its parent's content coordinates. Grabbing popups accept keyboard focus and dismiss on unhandled Escape or application deactivation. Passive popups preserve parent focus. Closing the parent closes its popups.
 
+A popup created with `show: false` ignores application deactivation and outside clicks until explicitly activated. Closing the parent still closes a hidden popup.
+
 Run `cargo run -p gpui --example popup` to exercise placement, resizing, nested menus, and keyboard activation.
 
 ### Additional Topics
