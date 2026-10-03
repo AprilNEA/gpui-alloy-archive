@@ -9,7 +9,7 @@ Alloy retains the complete Zed repository and history. GPUI crates keep their up
 
 ## Status
 
-Eleven patch topics are tracked on independent branches. Use only a snapshot that passed both GPUI and consumer checks. See the current validation state and fixed commit identifiers in [ALLOY.md](ALLOY.md).
+The first locally validated snapshot is `gpui-alloy/20261003.1`. All eleven patch topics are integrated and imported into Cupertino. Branches, records, and the snapshot tag have not been pushed. See [ALLOY.md](ALLOY.md#首个已验收快照) for fixed commits, checks, and platform limits.
 
 The default branch, `main`, contains the project README and maintenance ledger. The integration branch is `downstream/gpui`. Unmodified Zed commits are tracked through `upstream/main`. Existing upstream pull requests remain in [AprilNEA/zed](https://github.com/AprilNEA/zed).
 
@@ -17,12 +17,12 @@ See [ALLOY.md](ALLOY.md) for the maintenance policy, patch ledger, validation re
 
 ## Source exports
 
-Use Python 3.12 or later and Git. Export to a new directory. This example exports the initial candidate, which has no Cupertino patches:
+Use Python 3.12 or later and Git. Export to a new directory. This example exports the validated snapshot:
 
 ```sh
 ALLOY_U=4c841aaf1c4fa613e89a5d77096523d0ff593b56
-ALLOY_CANDIDATE=e1970b606ea086200bb077a9be23fc614d9df1f1
-python3 script/gpui_snapshot.py export --upstream "$ALLOY_U" --revision "$ALLOY_CANDIDATE" --snapshot /tmp/gpui-alloy-candidate
+ALLOY_CANDIDATE=19fc9968f689ccce2b9e31c2eb9a76ec442333dc
+python3 script/gpui_snapshot.py export --upstream "$ALLOY_U" --revision "$ALLOY_CANDIDATE" --snapshot /tmp/gpui-alloy-20261003.1
 ```
 
 The export retains original crate names and paths. `ALLOY-SNAPSHOT.json` records both commits, the exporter hash, package paths, and file hashes. See [ALLOY.md](ALLOY.md#导出工具和消费方来源检查) for the consumer check and dependency configuration limits.

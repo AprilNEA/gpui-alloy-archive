@@ -1,0 +1,58 @@
+Source check exit status 0
+Source: actual-source-check.log
+
+• Validating lock
+✓ Validating lock in 603µs
+• Configuring shell
+• Configuring cachix
+✓ Configuring cachix in 1.55ms
+• Evaluating shell
+✓ Evaluating shell in 586ms (cached)
+✓ Configuring shell in 596ms
+• Loading tasks
+• Evaluating devenv.config.task.config
+✓ Evaluating devenv.config.task.config in 65.7ms (cached)
+✓ Loading tasks in 66.8ms
+• Running tasks
+• Running devenv:files:cleanup
+✓ Running devenv:files:cleanup in 40.9ms
+• Running devenv:enterShell
+✓ Running devenv:enterShell in 16.4ms
+• Running devenv:enterTest
+✓ Running devenv:enterTest in 1.79µs (no command)
+✓ Running tasks in 57.5ms
+✨ devenv 2.1.2 is out of date. Please update to 2.4.0: https://devenv.sh/getting-started/#installation
+Verified snapshot 19fc9968f689ccce2b9e31c2eb9a76ec442333dc and 18 resolved packages; target=aarch64-apple-darwin, features=all, lock=locked. Build and native behavior remain separate checks.
+
+devenv test exit status 0
+Source: actual-consumer-check.log
+
+• Validating lock
+✓ Validating lock in 359µs
+• Configuring cachix
+✓ Configuring cachix in 1.13ms
+• Configuring shell
+• Evaluating shell
+✓ Evaluating shell in 70.5ms (cached)
+✓ Configuring shell in 101ms
+• Evaluating Nix
+✓ Evaluating Nix in 406µs (cached)
+• Loading tasks
+• Evaluating devenv.config.task.config
+✓ Evaluating devenv.config.task.config in 42.6ms (cached)
+✓ Loading tasks in 43.4ms
+• Running tasks
+• Running devenv:files:cleanup
+✓ Running devenv:files:cleanup in 205ms
+• Running devenv:enterShell
+✓ Running devenv:enterShell in 59.5ms
+• Running devenv:enterTest
+✓ Running devenv:enterTest in 3.17µs (no command)
+✓ Running tasks in 265ms
+• Building tests
+• Evaluating devenv.config.test
+✓ Evaluating devenv.config.test in 89.5ms (cached)
+✓ Building tests in 91.6ms
+• Running tests
+✓ Running tests in 384s
+• Tests passed :)
