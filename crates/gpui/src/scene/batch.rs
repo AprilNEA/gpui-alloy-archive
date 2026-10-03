@@ -13,6 +13,8 @@ pub(crate) enum PrimitiveKind {
     Shadow,
     #[default]
     Quad,
+    #[cfg(target_os = "macos")]
+    ContinuousQuad,
     Path,
     Underline,
     MonochromeSprite,
@@ -35,6 +37,10 @@ pub(super) struct BatchIterator<'a> {
     shadows_iter: Peekable<slice::Iter<'a, Shadow>>,
     quads_start: usize,
     quads_iter: Peekable<slice::Iter<'a, Quad>>,
+    #[cfg(target_os = "macos")]
+    continuous_quads_start: usize,
+    #[cfg(target_os = "macos")]
+    continuous_quads_iter: Peekable<slice::Iter<'a, Quad>>,
     paths_start: usize,
     paths_iter: Peekable<slice::Iter<'a, Path<ScaledPixels>>>,
     underlines_start: usize,
@@ -60,6 +66,10 @@ impl<'a> BatchIterator<'a> {
             shadows_iter: scene.shadows.iter().peekable(),
             quads_start: 0,
             quads_iter: scene.quads.iter().peekable(),
+            #[cfg(target_os = "macos")]
+            continuous_quads_start: 0,
+            #[cfg(target_os = "macos")]
+            continuous_quads_iter: scene.continuous_quads.iter().peekable(),
             paths_start: 0,
             paths_iter: scene.paths.iter().peekable(),
             underlines_start: 0,
@@ -95,6 +105,11 @@ impl<'a> Iterator for BatchIterator<'a> {
                 PrimitiveKind::Shadow,
             ),
             (self.quads_iter.peek().map(|q| q.order), PrimitiveKind::Quad),
+            #[cfg(target_os = "macos")]
+            (
+                self.continuous_quads_iter.peek().map(|q| q.order),
+                PrimitiveKind::ContinuousQuad,
+            ),
             (self.paths_iter.peek().map(|q| q.order), PrimitiveKind::Path),
             (
                 self.underlines_iter.peek().map(|u| u.order),
@@ -162,6 +177,21 @@ impl<'a> Iterator for BatchIterator<'a> {
                 }
                 self.quads_start = quads_end;
                 Some(PrimitiveBatch::Quads(quads_start..quads_end))
+            }
+            #[cfg(target_os = "macos")]
+            PrimitiveKind::ContinuousQuad => {
+                let start = self.continuous_quads_start;
+                let mut end = start + 1;
+                self.continuous_quads_iter.next();
+                while self
+                    .continuous_quads_iter
+                    .next_if(|quad| (quad.order, batch_kind) < max_order_and_kind)
+                    .is_some()
+                {
+                    end += 1;
+                }
+                self.continuous_quads_start = end;
+                Some(PrimitiveBatch::ContinuousQuads(start..end))
             }
             PrimitiveKind::Path => {
                 let paths_start = self.paths_start;
@@ -284,6 +314,8 @@ impl<'a> Iterator for BatchIterator<'a> {
 pub enum PrimitiveBatch {
     Shadows(Range<usize>),
     Quads(Range<usize>),
+    #[cfg(target_os = "macos")]
+    ContinuousQuads(Range<usize>),
     Paths(Range<usize>),
     Underlines(Range<usize>),
     MonochromeSprites {
@@ -310,6 +342,8 @@ impl PrimitiveBatch {
         match self {
             Self::Shadows(range) => format!("shadows ({})", range.len()),
             Self::Quads(range) => format!("quads ({})", range.len()),
+            #[cfg(target_os = "macos")]
+            Self::ContinuousQuads(range) => format!("continuous quads ({})", range.len()),
             Self::Paths(range) => format!("paths ({})", range.len()),
             Self::Underlines(range) => format!("underlines ({})", range.len()),
             Self::MonochromeSprites { texture_id, range } => {
