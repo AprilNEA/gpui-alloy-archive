@@ -13,16 +13,16 @@ GPUI Alloy 维护一份跟踪 Zed 的 GPUI 下游版本，同时把可通用的�
 - 不要求所有自有补丁都提交上游。拒绝、延后或放弃上游提交时，记录理由和后续维护责任。
 - 由一名集成维护人负责每次同步和快照验收。其他贡献者通过独立主题提交交付修改。
 
-本文件是维护规范和补丁台账的唯一索引。Cupertino 的 `docs/upstream-maintenance.md` 只保留入口和消费状态，不复制补丁台账。Git 保存代码版本，GitHub 保存讨论和 review；台账保存两者的对应关系、关键决定和验证入口。不复制全部聊天记录，不另建 YAML 台账或发布机器人。
+本文件是维护规范和补丁台账的唯一索引，以 `main` 分支的版本为准。文档变更先提交到 `main`，再合入 `downstream/gpui`；集成分支和快照中的文档保留对应时刻的记录，不独立维护另一套台账。Cupertino 的 `docs/upstream-maintenance.md` 只保留入口和消费状态，不复制补丁台账。Git 保存代码版本，GitHub 保存讨论和 review；台账保存两者的对应关系、关键决定和验证入口。不复制全部聊天记录，不另建 YAML 台账或发布机器人。
 
 ## 分支和不可变快照
 
-以下约定区分 Alloy 集成仓库和 Zed 贡献 fork。已有 PR 分支保留原名称，不为命名统一而重建 PR。Alloy 的目标默认分支为 `downstream/gpui`；README 和本台账随该分支维护，不提交到纯上游镜像 `main`。
+以下约定区分 Alloy 集成仓库和 Zed 贡献 fork。已有 PR 分支保留原名称，不为命名统一而重建 PR。Alloy 的默认分支为 `main`，保留 README 和本台账；`downstream/gpui` 负责 GPUI 补丁集成。纯上游代码通过 `upstream/main` 和记录的完整 `U` 跟踪。消费方使用通过验收的 `D`；`main` 不代表最新集成源码或可消费快照。
 
 | 引用 | 用途 | 更新规则 |
 | --- | --- | --- |
 | `upstream/main` | 本地跟踪 Zed 的远端引用 | 执行 fetch 后更新；记录本次使用的完整 SHA。 |
-| Alloy 的 `main` | 上游镜像 | 只允许快进同步 Zed，不加入自有提交。出现分叉时先查明原因。 |
+| Alloy 的 `main` | 项目入口、维护文档和选定的上游源码 | 文档使用普通提交更新；同步上游源码时保留 Alloy 文档。不得将该分支直接作为上游 PR 的基线。 |
 | Alloy 的 `downstream/gpui` | 自有 GPUI 的集成分支 | 保留已发布历史；通过普通提交和 merge 更新，不 rebase 已被消费的历史。 |
 | `AprilNEA/zed` 的 `fix/<topic>`、`feat/<topic>`、`test/<topic>` | 一个上游 PR 的主题分支 | 从记录的上游基线创建，只携带该主题和明确批准的前置依赖。 |
 | `local/<topic>` | 仅自用补丁的工作分支 | 可从集成分支创建；不得直接用来向 Zed 提 PR。 |
@@ -30,7 +30,7 @@ GPUI Alloy 维护一份跟踪 Zed 的 GPUI 下游版本，同时把可通用的�
 | `gpui-alloy/YYYYMMDD.N` | 通过验收的集成快照 tag | 必须为附注 tag；发布后不得移动或删除。它不是 Cargo 包版本号。 |
 | `archive/gpui-NNN/YYYYMMDD-N` | topic 改写前的历史 tag | 在 rebase、替换或删除 topic 前保留旧 head；不得移动或删除。 |
 
-上游 PR 分支不得从 `downstream/gpui` 创建。集成分支可能包含材料算法、未提交功能和分发调整，这些改动不能进入无关 PR。
+上游 PR 分支必须从记录的纯上游 `U` 创建，不得从 Alloy 的 `main` 或 `downstream/gpui` 创建。`main` 包含 Alloy 文档，集成分支还可能包含材料算法、未提交功能和分发调整，这些改动不能进入无关 PR。
 
 使用独立 worktree 处理 topic 和同步候选。不要在含有未提交组件改动的工作区切换维护分支。不要为了整理历史而混入其他人的暂存内容。
 
@@ -191,7 +191,7 @@ Cupertino 当前消费方式是 path 依赖 `gpui`，并非 `gpui-pre`。后续�
 
 | 编号 | 主题与分支 | 上游状态 | 下一步 |
 | --- | --- | --- | --- |
-| GPUI-010 | 原生锚定弹窗；`feat/macos-anchored-popup` | [#64353](https://github.com/zed-industries/zed/pull/64353) 开放；与 `main` 冲突；没有人工 review；CI 为 `action_required`。 | 保存旧 head 后解决冲突，重新执行相关检查。原生多屏和混合 DPI 仍未验证。 |
+| GPUI-010 | 原生锚定弹窗；`feat/macos-anchored-popup` | [#64353](https://github.com/zed-industries/zed/pull/64353) 开放；与 Zed 的 `main` 冲突；没有人工 review；CI 为 `action_required`。 | 保存旧 head 后解决冲突，重新执行相关检查。原生多屏和混合 DPI 仍未验证。 |
 | GPUI-011 | 无标题 popup 去除原生装饰；`fix/macos-popup-decorations` | [#64430](https://github.com/zed-industries/zed/pull/64430) 开放；无合并冲突；已补截图，但仍为 `CHANGES_REQUESTED`；CI 为 `action_required`。 | 核实 borderless 拖动风险，再推动复审和 CI。机器审查提示尚未独立复现。 |
 
 GPUI-010 当前 head 为 `619d4b2b3da3040e61c027a394aa5417123e92d0`。GPUI-011 当前 head 为 `22df6ff9402b46943d5948e767b4c7ad493d69c3`。两个分支都位于 `AprilNEA/zed`。当前 head 已由下文的本地归档 tag 保存；原始创建基线和更早的改写记录仍需补齐；PR 当前 base 的 SHA 不能代替原始创建基线。
@@ -264,7 +264,9 @@ Cupertino 导入提交 V：由导入后的历史事件补充。
 
 ## 仓库初始化记录
 
-2026-10-03：创建公开仓库 `AprilNEA/gpui-alloy`。保留完整 Zed 历史；本地 `main` 指向初始 `U`，`downstream/gpui` 承载 Alloy 文档。原有 `AprilNEA/zed` 仓库和 PR 分支未被改写。
+2026-10-03：创建公开仓库 `AprilNEA/gpui-alloy`。保留完整 Zed 历史；首次建立时，本地 `main` 指向初始 `U`，`downstream/gpui` 承载 Alloy 文档。原有 `AprilNEA/zed` 仓库和 PR 分支未被改写。
+
+2026-10-03：按维护人要求，将已有文档提交快进合入 `main`，并将 `main` 确定为默认入口和台账维护分支。`downstream/gpui` 同步该文档调整。两分支的 GPUI 源码仍保持初始 `U`，尚未迁入本地补丁。取消 `main` 对 `upstream/main` 的分支跟踪关系；首次推送后跟踪 `origin/main`。
 
 | 本地 remote | 地址 | 用途 |
 | --- | --- | --- |
@@ -279,14 +281,14 @@ Cupertino 导入提交 V：由导入后的历史事件补充。
 | `archive/gpui-010/20261003-1` | #64353 | `619d4b2b3da3040e61c027a394aa5417123e92d0` |
 | `archive/gpui-011/20261003-1` | #64430 | `22df6ff9402b46943d5948e767b4c7ad493d69c3` |
 
-初始化时这些分支、文档和 tag 仅在本地，尚未推送。GitHub 默认分支仍为 `main`；首次推送后由维护人改为 `downstream/gpui`。本地归档不满足远端持久化要求，确认推送成功前不得改写已有 PR 分支。
+初始化时这些分支、文档和 tag 仅在本地，尚未推送。GitHub 默认分支保持为 `main`，首次推送后即可在仓库首页查看 Alloy 文档。本地归档不满足远端持久化要求，确认推送成功前不得改写已有 PR 分支。
 
 由维护人在 Alloy 仓库运行以下命令。显式列出引用，避免把上游的其他 tag 或分支一并推送。
 
 ```sh
 git push --atomic origin main downstream/gpui refs/tags/archive/gpui-010/20261003-1 refs/tags/archive/gpui-011/20261003-1
-gh repo edit AprilNEA/gpui-alloy --default-branch downstream/gpui
 git fetch origin
+git branch --set-upstream-to=origin/main main
 git branch --set-upstream-to=origin/downstream/gpui downstream/gpui
 git ls-remote origin refs/heads/main refs/heads/downstream/gpui 'refs/tags/archive/gpui-*'
 ```
