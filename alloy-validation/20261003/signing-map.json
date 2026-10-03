@@ -1,0 +1,239 @@
+{
+  "date": "2026-10-03",
+  "signer_fingerprint": "SHA256:X/k8e9F//KEmSaoFv1H11/DPGw8CaMR2pDGvFhRbjaw",
+  "snapshot": "d21987f81a013ec67945892506bcc6aae8a2db0f",
+  "consumer_import": "ea9cc093403f45a26f32d0ae415007fef95e3b09",
+  "commits": {
+    "alloy": {
+      "80222ec015a7ba381f3cd6bb95b35bc0476b15bf": "a1ab296fcd88f01900cc616d2b934564c95bf8c3",
+      "e334e7b64830121436cbffcca83521fd8c7173ef": "0f31f3c56aa6cad679d2de3c36ec838d09610ea9",
+      "3b714e845fa473ad53cb299653a38696cd6e2f1e": "02c9bcf88b50768302b3ba95ca1cc8f52d345576",
+      "2387142b99ef39787f872e1d3a5925b259627b1d": "1f55d0eaf4b55a88316ee1b4fb30bdb9a564e5d0",
+      "a09b1d01f967f05b6c18fdb93d70dd625b17c07d": "91f103447160b013c67e74f60204f1dadd039b74",
+      "ae2f53dcf6e8a25e933c695fbe7bc30079a04832": "271ec2547b5f81740cd1f1855ec647e50b98a852",
+      "05dc2cf96a652c23ab1a54bfc5ba7e5f762c66e5": "9710df14519e1fedee1bdd8d16d57e712bcfb23c",
+      "46d1fe8255b73a46413d4fe579ec3504e7f38a66": "98c107d7bcc00df80a64ca68385aaf332943a99a",
+      "e9a82d67908b5d4252538d1731e7a43df874b1ca": "d09c26a6bf798eccc23e277450e1e8614f088a50",
+      "32bc7317a4e7a6bcc4b4d18121608c7d270ff451": "445e4f9af7b6da4b3dcd52db4e0374a7a8a9942d",
+      "f00547a0b37e8a6b56cf18652377d8053b382d02": "d18eac8291ac04d5bf06dc397fd60f0340bef584",
+      "225e82553c278211ff44bff3bca5d0f7d1fefb3f": "459b3648bf99f6cc5cd149a6d3e695bb476f3fec",
+      "f51fc5a732101d26f6b40b1c208cfde3af5f0e66": "62874a50e593f2a1d207e71b7cc6fda10ae57e53",
+      "e1970b606ea086200bb077a9be23fc614d9df1f1": "ada6d9a4cf71f85975a85c46264f17769b45bc3f",
+      "cf9cf4d43a075df5d6e3e1cb5ae4f881ff31939f": "97f50b5f861048b8125758cbd33d5dbc465396b8",
+      "f1342596bc312793bd9f92d84ca4f51274319ad3": "7813ac967b97157a1dd4cfcc51b89405c060cb06",
+      "568b91fc0116dd37bde7c1193e02b8d3d75264e2": "7ca95bac15c3acbe3a1e31df36506268893ae934",
+      "ceeadeb87b62478a0637321c12357514b1baa161": "c3f8df6a4049a936cf8b9a6e10b07543afd476ea",
+      "fb3f4bbf0e4c9d15e6f5c001d7069cb0e89be3b6": "3d589407dd6dc4517c9b9880eeb293b91c9fb06a",
+      "81c7314a8aa8732d079d67f47aaed50f0d96907e": "5e87d3b00505ca3b82fd80bacc2e89eced22c9b0",
+      "88f74325abc1ac3e202944d153b2fc03dec301a5": "0160c3b0efdd66a0139c7e513bac782137835a74",
+      "45d8245ead2a2ffad055f5c81efefa165e400274": "6e986fed451c9a0bce4869c2e4c279a93a51d51f",
+      "086cd6f1fcadf7b5b76718c204075b864cda9996": "e4339c0401cc1aaa7dafef3736b10cd3d2d83169",
+      "f3f16428802dfa05e504228129ad8e7eded4eafe": "2b700eb4502f6e95226c9e5c4af5de26a8f2417b",
+      "d789e210b800563d60708d666bc17a3458534713": "1590bee3ffc62bd30a4c77d31210258ba5ccf862",
+      "16ea6dbe73d2178cca758a51e1c78b8ff760938a": "5c8110941912a50b1c0cb2c6c4550b4db57a2af1",
+      "014800185f549cd48fa637bb08e10fa29ae742ee": "0eed1c8c15168e69669da536cd9afe656416724f",
+      "38f3cb8a160f935981b1dfb8eaa15f32cf27e7f6": "84375ad9508cedad382ac22205d6fb6874838533",
+      "3141bcb75920e9c005d82bc43d3df9420dbc2d43": "39b18b3ad47d3aa1434f449d0e119aab5d8fc2ef",
+      "5a21f65e1d01e1668ae4683c48260df574c84c4d": "719b8f889e300689701d9452e46d842e3da9fb17",
+      "fb76f3ee57fddbf5f47b012fc2be30db3065b8ca": "7308351e53d9cb905390cfe8ce07e164494413a3",
+      "19fc9968f689ccce2b9e31c2eb9a76ec442333dc": "d21987f81a013ec67945892506bcc6aae8a2db0f",
+      "b12bfaffa0a305463eacdba12c4501eb8f183c34": "e04a419e29fdfba926e29a067217a02f13e743a1",
+      "2e201d84f55d807adb299558ee6bcc2addea5502": "e4b35e47bcbdc95a32c9109d1f6657463401c7f2"
+    },
+    "consumer": {
+      "c79bb253dd456877b61e1503ec4f2c549838a86e": "7bb5515bae5ab84db2360324a1bc8fc12ae6f1b4",
+      "7d7989be3b0b4e06084ca3293372c55067a9cfc1": "a316fcf8ea2f9f4877f4f197bc6044b60619ffb9"
+    }
+  },
+  "branches": {
+    "alloy": {
+      "refs/heads/chore/gpui-export": {
+        "old": "cf9cf4d43a075df5d6e3e1cb5ae4f881ff31939f",
+        "new": "97f50b5f861048b8125758cbd33d5dbc465396b8"
+      },
+      "refs/heads/chore/gpui-migration-20261003": {
+        "old": "19fc9968f689ccce2b9e31c2eb9a76ec442333dc",
+        "new": "d21987f81a013ec67945892506bcc6aae8a2db0f"
+      },
+      "refs/heads/downstream/gpui": {
+        "old": "19fc9968f689ccce2b9e31c2eb9a76ec442333dc",
+        "new": "d21987f81a013ec67945892506bcc6aae8a2db0f"
+      },
+      "refs/heads/feat/gpui-autoscroll-on-focus": {
+        "old": "32bc7317a4e7a6bcc4b4d18121608c7d270ff451",
+        "new": "445e4f9af7b6da4b3dcd52db4e0374a7a8a9942d"
+      },
+      "refs/heads/feat/gpui-continuous-quad": {
+        "old": "a09b1d01f967f05b6c18fdb93d70dd625b17c07d",
+        "new": "91f103447160b013c67e74f60204f1dadd039b74"
+      },
+      "refs/heads/feat/gpui-inert": {
+        "old": "e9a82d67908b5d4252538d1731e7a43df874b1ca",
+        "new": "d09c26a6bf798eccc23e277450e1e8614f088a50"
+      },
+      "refs/heads/feat/gpui-ordered-backdrop": {
+        "old": "2387142b99ef39787f872e1d3a5925b259627b1d",
+        "new": "1f55d0eaf4b55a88316ee1b4fb30bdb9a564e5d0"
+      },
+      "refs/heads/fix/gpui-cancel-pending-activation": {
+        "old": "05dc2cf96a652c23ab1a54bfc5ba7e5f762c66e5",
+        "new": "9710df14519e1fedee1bdd8d16d57e712bcfb23c"
+      },
+      "refs/heads/fix/gpui-interceptor-propagation": {
+        "old": "46d1fe8255b73a46413d4fe579ec3504e7f38a66",
+        "new": "98c107d7bcc00df80a64ca68385aaf332943a99a"
+      },
+      "refs/heads/fix/gpui-spring-clock": {
+        "old": "80222ec015a7ba381f3cd6bb95b35bc0476b15bf",
+        "new": "a1ab296fcd88f01900cc616d2b934564c95bf8c3"
+      },
+      "refs/heads/local/gpui-010-native-popup": {
+        "old": "225e82553c278211ff44bff3bca5d0f7d1fefb3f",
+        "new": "459b3648bf99f6cc5cd149a6d3e695bb476f3fec"
+      },
+      "refs/heads/local/gpui-011-popup-decorations": {
+        "old": "3b714e845fa473ad53cb299653a38696cd6e2f1e",
+        "new": "02c9bcf88b50768302b3ba95ca1cc8f52d345576"
+      },
+      "refs/heads/local/gpui-inactive-clear": {
+        "old": "ae2f53dcf6e8a25e933c695fbe7bc30079a04832",
+        "new": "271ec2547b5f81740cd1f1855ec647e50b98a852"
+      },
+      "refs/heads/main": {
+        "old": "2e201d84f55d807adb299558ee6bcc2addea5502",
+        "new": "e4b35e47bcbdc95a32c9109d1f6657463401c7f2"
+      },
+      "refs/heads/test/gpui-accessibility-window": {
+        "old": "e334e7b64830121436cbffcca83521fd8c7173ef",
+        "new": "0f31f3c56aa6cad679d2de3c36ec838d09610ea9"
+      }
+    },
+    "consumer": {
+      "refs/heads/feat/component-library": {
+        "old": "7d7989be3b0b4e06084ca3293372c55067a9cfc1",
+        "new": "a316fcf8ea2f9f4877f4f197bc6044b60619ffb9"
+      }
+    }
+  },
+  "tags": [
+    {
+      "repository": "alloy",
+      "archive": "archive/pre-signing-20261003/downstream/gpui",
+      "old_target": "19fc9968f689ccce2b9e31c2eb9a76ec442333dc",
+      "archive_object": "37ae496a53e8d2794936cacfc9889548b41aee5a"
+    },
+    {
+      "repository": "alloy",
+      "archive": "archive/pre-signing-20261003/feat/gpui-autoscroll-on-focus",
+      "old_target": "32bc7317a4e7a6bcc4b4d18121608c7d270ff451",
+      "archive_object": "63e41764b05776adffd2868a38e9f83deac5bdf8"
+    },
+    {
+      "repository": "alloy",
+      "archive": "archive/pre-signing-20261003/feat/gpui-continuous-quad",
+      "old_target": "a09b1d01f967f05b6c18fdb93d70dd625b17c07d",
+      "archive_object": "8e69091faf7f65e9092d4d1610c8238c4106acb8"
+    },
+    {
+      "repository": "alloy",
+      "archive": "archive/pre-signing-20261003/feat/gpui-inert",
+      "old_target": "e9a82d67908b5d4252538d1731e7a43df874b1ca",
+      "archive_object": "e8352a21b196dfc89cebfa4bda29559a8bc53226"
+    },
+    {
+      "repository": "alloy",
+      "archive": "archive/pre-signing-20261003/feat/gpui-ordered-backdrop",
+      "old_target": "2387142b99ef39787f872e1d3a5925b259627b1d",
+      "archive_object": "79d85d00b932daa9d4827371383b275157bed0f2"
+    },
+    {
+      "repository": "alloy",
+      "archive": "archive/pre-signing-20261003/fix/gpui-cancel-pending-activation",
+      "old_target": "05dc2cf96a652c23ab1a54bfc5ba7e5f762c66e5",
+      "archive_object": "7c93745ce5f1a652fd0298fe445ccd156918c339"
+    },
+    {
+      "repository": "alloy",
+      "archive": "archive/pre-signing-20261003/fix/gpui-interceptor-propagation",
+      "old_target": "46d1fe8255b73a46413d4fe579ec3504e7f38a66",
+      "archive_object": "9a65460298a44b34e5fd473a94ce603ebecb4a38"
+    },
+    {
+      "repository": "alloy",
+      "archive": "archive/pre-signing-20261003/fix/gpui-spring-clock",
+      "old_target": "80222ec015a7ba381f3cd6bb95b35bc0476b15bf",
+      "archive_object": "796826eb105360e245d38bc6d03acda2d6b3e3af"
+    },
+    {
+      "repository": "alloy",
+      "archive": "archive/pre-signing-20261003/local/gpui-010-native-popup",
+      "old_target": "225e82553c278211ff44bff3bca5d0f7d1fefb3f",
+      "archive_object": "16d54ebab99fd0cd63ce42bc2cf23791d221ecc6"
+    },
+    {
+      "repository": "alloy",
+      "archive": "archive/pre-signing-20261003/local/gpui-011-popup-decorations",
+      "old_target": "3b714e845fa473ad53cb299653a38696cd6e2f1e",
+      "archive_object": "175abba4b1f8cf615c7222dc3ba1aece5a59b5fd"
+    },
+    {
+      "repository": "alloy",
+      "archive": "archive/pre-signing-20261003/local/gpui-inactive-clear",
+      "old_target": "ae2f53dcf6e8a25e933c695fbe7bc30079a04832",
+      "archive_object": "fb6c84b1ba768b67d0a7465efa944203feac39c5"
+    },
+    {
+      "repository": "alloy",
+      "archive": "archive/pre-signing-20261003/main",
+      "old_target": "2e201d84f55d807adb299558ee6bcc2addea5502",
+      "archive_object": "8661366f71f1f424b9b1b5814206a6e5ec5a3d1c"
+    },
+    {
+      "repository": "alloy",
+      "archive": "archive/pre-signing-20261003/test/gpui-accessibility-window",
+      "old_target": "e334e7b64830121436cbffcca83521fd8c7173ef",
+      "archive_object": "4a568d9cf3fc6e9d6a21d4ccc1a0307b9de47fac"
+    },
+    {
+      "repository": "alloy",
+      "tag": "archive/gpui-010/20261003-1",
+      "old_object": "1750f94c841de06c49bb09b50fbdcd898e11899c",
+      "new_object": "841805a4acaf9e4601bdd88dd94c3e9a1d26c91d",
+      "old_target": "619d4b2b3da3040e61c027a394aa5417123e92d0",
+      "new_target": "619d4b2b3da3040e61c027a394aa5417123e92d0",
+      "archive": "archive/pre-signing-20261003/tags/archive/gpui-010/20261003-1",
+      "archive_object": "8c1610175e8bf25daaeaf38605e2c977f4a385c4"
+    },
+    {
+      "repository": "alloy",
+      "tag": "archive/gpui-011/20261003-1",
+      "old_object": "f5d7142b6410e982f63a95cafda590c62efb1f28",
+      "new_object": "7a76e7bc182fe2b1cd740a2531b3d54b752baa68",
+      "old_target": "22df6ff9402b46943d5948e767b4c7ad493d69c3",
+      "new_target": "22df6ff9402b46943d5948e767b4c7ad493d69c3",
+      "archive": "archive/pre-signing-20261003/tags/archive/gpui-011/20261003-1",
+      "archive_object": "d9fef47fd8627c9c7c57beb94d657781edceff32"
+    },
+    {
+      "repository": "alloy",
+      "tag": "gpui-alloy/20261003.1",
+      "old_object": "a69ba31852e5d36a489400c273d88eeded8245cc",
+      "new_object": "87e974154254c5e92ef3e37a0612ea9e3db0f34f",
+      "old_target": "19fc9968f689ccce2b9e31c2eb9a76ec442333dc",
+      "new_target": "d21987f81a013ec67945892506bcc6aae8a2db0f",
+      "archive": "archive/pre-signing-20261003/tags/gpui-alloy/20261003.1",
+      "archive_object": "73031b68fd65352d560488ba911820f81e136cba"
+    },
+    {
+      "repository": "consumer",
+      "archive": "archive/pre-signing-20261003/gpui-import",
+      "old_target": "7d7989be3b0b4e06084ca3293372c55067a9cfc1",
+      "archive_object": "0f34215f5a12f50108a5a8c37c5659803f646d0c"
+    }
+  ],
+  "checks": [
+    "Every mapped commit preserves tree, author, committer, message, and mapped parent order.",
+    "Every mapped commit and every new tag passes SSH signature verification.",
+    "The consumer metadata follow-up changes only the export README, export record, and maintenance document."
+  ]
+}

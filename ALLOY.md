@@ -1,6 +1,6 @@
 # GPUI Alloy 维护规范与补丁台账
 
-当前本地可消费快照为 `gpui-alloy/20261003.1`，已导入 Cupertino。最新结果见[首个已验收快照](#首个已验收快照)；前文初始化与候选记录保留历史状态。
+当前已签名快照为 `gpui-alloy/20261003.1`，已导入 Cupertino。当前 SHA、签名映射和验收结果见[首次签名与发布](#首次签名与发布)；初始化、候选和首次验收记录保留历史状态。
 
 GPUI Alloy 维护一份跟踪 Zed 的 GPUI 下游版本，同时把可通用的修改独立提交给上游。允许保留自有补丁，但每个补丁必须有来源、用途、依赖、验证结果和退出条件。消费方必须使用可重现的固定快照。
 
@@ -516,3 +516,28 @@ git push --atomic origin main downstream/gpui \
 ```
 
 Cupertino 当前没有 remote，导入提交位于 `feat/component-library`。维护人另行配置远端并推送。向 Zed 更新 PR 前仍须确认历史归档已推送、复核最新上游和原有 review，并完成人工审阅标记确认。
+
+
+## 首次签名与发布
+
+2026-10-03：维护人明确要求「全部重新签名然后推送」。首次推送前，Alloy 的 34 个自有提交及 Cupertino 的 2 个迁移提交完成 SSH 重新签名；15 个 Alloy 工作分支及 Cupertino 的迁移分支按同一映射更新。上游 U、上游历史、原 PR 分支及其远端均保持不变。Cupertino 另增加签名提交 `ea9cc093403f45a26f32d0ae415007fef95e3b09`，更新消费方的快照来源信息。
+
+本次采用用户授权的首次远端发布前例外：原 D 虽已在本地消费，尚未发布到远端；本次允许重签历史及同名重建 3 个附注 tag。此例外不适用于后续已发布快照。原 D、原 V、全部独立主题 head 和原 tag 对象均以签名归档保留。`archive/pre-signing-20261003/tags/…` 直接指向旧 tag 对象，而非仅保存 peeled commit；原有 PR 归档 tag 的目标提交未改变。
+
+完整旧→新提交、分支及 tag 对象映射见 [signing-map.json](alloy-validation/20261003/signing-map.json)。逐提交检查确认完整 tree、作者、提交者、消息和父提交顺序保持一致。所有新提交及 tag 均以 Git 与 SSH 验签，签名指纹为 `SHA256:X/k8e9F//KEmSaoFv1H11/DPGw8CaMR2pDGvFhRbjaw`，对应 GitHub 已登记的 1Password 公钥。
+
+| 当前引用 | 签名后的固定值 |
+| --- | --- |
+| 上游 U | `4c841aaf1c4fa613e89a5d77096523d0ff593b56` |
+| Alloy D / `downstream/gpui` | `d21987f81a013ec67945892506bcc6aae8a2db0f` |
+| `gpui-alloy/20261003.1` tag object | `87e974154254c5e92ef3e37a0612ea9e3db0f34f` |
+| Cupertino 当前 V | `ea9cc093403f45a26f32d0ae415007fef95e3b09` |
+| Cupertino 导出记录 SHA-256 | `88a1781f7241d1f6a5f0f178a63230e0730085fce93c0f1049b66445a076615a` |
+
+旧 D 的完整 tree 与新 D 一致。从新 D 重新导出后，436 项清单中仅导出入口 README 的来源 SHA 改变，`ALLOY-SNAPSHOT.json` 同步更新来源 SHA 与该 README 的摘要。其余源码、资源、manifest、lockfile 与 exporter 摘要保持一致。实际消费方与干净 V 的来源检查均确认 18 个配套包来自签名 D。
+
+在新 D 上重新执行格式、Clippy、491 项串行库测试、5 项 scene、17 项 Metal、1 项 popup 示例、2 项原生窗口 harness 以及 3 项预编译 Metal 检查，均通过；见[签名 D 验收日志](alloy-validation/20261003/gpui-signed.txt)。在新 V 的干净工作区重新执行来源检查、格式、Clippy 和 64 项测试，均通过，前后工作区为空；见[签名 V 验收日志](alloy-validation/20261003/consumer-signed.txt)。检查环境和平台限制与首个验收记录一致。
+
+独立 topic 的原验收日志仍绑定原 SHA。本次只增加签名与映射后的父引用，依据逐提交 tree 和父拓扑等价检查继承独立 topic 的结果；未声称逐个 topic 重跑。组合 D 和消费 V 的结果则来自上述新 SHA 的实际执行。原始失败日志保留；本轮不重复默认并行 profiler 检查，也不将该检查记为通过。
+
+Cupertino 原有组件暂存 diff 的 SHA-256 仍为 `866e25b09971ab69601bd8e6bf2a2fc8ce76bf4524a41e82f64c0b22d1e17619`。其余未提交工作未纳入本次提交。推送目标经 GitHub API 核对为维护人具有管理权限的公开 `AprilNEA/gpui-alloy` 和 `AprilNEA/gpui-cupertino`；首次检查时两者均没有远端 refs。Cupertino 已配置同名仓库为 `origin`，推送仅包含 `feat/component-library` 及 `archive/pre-signing-20261003/gpui-import`。Alloy 推送 15 个自有工作分支和 19 个签名 tag，不推送或更新 Zed PR 分支。远端发布核对结果在推送后追加。
