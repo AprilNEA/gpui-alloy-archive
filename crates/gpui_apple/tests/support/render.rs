@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 use gpui::{
     Backdrop, Bounds, ContentMask, DevicePixels, PlatformHeadlessRenderer, Quad, ScaledPixels,
     Scene, point, rgb, size,

@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 //! Pixel regressions for the native Metal backdrop path on an opaque surface.
 #![cfg(target_os = "macos")]
 

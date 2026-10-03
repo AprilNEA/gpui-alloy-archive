@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 //! Check GPU color conversion against the public ColorSync CPU implementation.
 #![cfg(target_os = "macos")]
 

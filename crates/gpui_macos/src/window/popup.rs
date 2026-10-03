@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 use super::{MacWindowState, get_window_state, is_gpui_window};
 use anyhow::{Context as _, Result};
 use block2::RcBlock;

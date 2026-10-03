@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 //! Native edge samples and scene regressions for continuous glass outlines.
 #![cfg(target_os = "macos")]
 

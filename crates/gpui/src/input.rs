@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 use crate::{
     App, Bounds, ClipboardItem, Context, Entity, InputHandler, Pixels, TextInputConfiguration,
     UTF16Selection, Window,

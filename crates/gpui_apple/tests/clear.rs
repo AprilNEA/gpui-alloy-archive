@@ -1,3 +1,5 @@
+// Modified by AprilNEA for GPUI Alloy. Patch records: https://github.com/AprilNEA/gpui-alloy/blob/main/ALLOY.md
+
 //! Native inactive Clear anchors and scene integration regression checks.
 #![cfg(target_os = "macos")]
 
