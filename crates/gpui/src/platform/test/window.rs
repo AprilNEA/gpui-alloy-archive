@@ -1,9 +1,10 @@
 use crate::{
-    AnyWindowHandle, Bounds, DevicePixels, DispatchEventResult, GpuSpecs, HeadlessAtlas, Pixels,
-    PlatformAtlas, PlatformDisplay, PlatformHeadlessRenderer, PlatformInput, PlatformInputHandler,
-    PlatformWindow, Point, PromptButton, RequestFrameOptions, Scene, Size, TestPlatform,
-    TextInputConfiguration, TextInputStateChange, WindowAppearance, WindowBackgroundAppearance,
-    WindowBounds, WindowControlArea, WindowInsets, WindowParams, WindowVisibility,
+    A11yCallbacks, AnyWindowHandle, Bounds, DevicePixels, DispatchEventResult, GpuSpecs,
+    HeadlessAtlas, Pixels, PlatformAtlas, PlatformDisplay, PlatformHeadlessRenderer, PlatformInput,
+    PlatformInputHandler, PlatformWindow, Point, PromptButton, RequestFrameOptions, Scene, Size,
+    TestPlatform, TextInputConfiguration, TextInputStateChange, WindowAppearance,
+    WindowBackgroundAppearance, WindowBounds, WindowControlArea, WindowInsets, WindowParams,
+    WindowVisibility,
 };
 use gpui_util::ResultExt as _;
 #[cfg(any(test, feature = "test-support"))]
@@ -56,6 +57,8 @@ pub(crate) struct TestWindowState {
     appearance: WindowAppearance,
     external_drag_files: Vec<(PathBuf, bool)>,
     start_external_drag_result: bool,
+    a11y_callbacks: Option<Rc<A11yCallbacks>>,
+    a11y_tree_update: Option<accesskit::TreeUpdate>,
 }
 
 #[derive(Clone)]
@@ -130,6 +133,8 @@ impl TestWindow {
             appearance: WindowAppearance::Light,
             external_drag_files: Vec::new(),
             start_external_drag_result: false,
+            a11y_callbacks: None,
+            a11y_tree_update: None,
         })))
     }
     pub fn simulate_scheduled_frame(&self) -> bool {
@@ -287,9 +292,53 @@ impl TestWindow {
     pub fn set_start_external_drag_result(&self, result: bool) {
         self.0.lock().start_external_drag_result = result;
     }
+
+    /// Activates accessibility through the platform callback.
+    /// Run the test executor afterward to obtain the rendered tree.
+    ///
+    /// # Panics
+    /// Panics if accessibility was disabled in the window options.
+    pub fn activate_accessibility(&self) {
+        let callbacks = self
+            .0
+            .lock()
+            .a11y_callbacks
+            .clone()
+            .expect("window accessibility must be enabled");
+        let update = (callbacks.activation)();
+        self.0.lock().a11y_tree_update = update;
+    }
+
+    /// Returns the latest accessibility tree update sent to this window.
+    pub fn accessibility_tree_update(&self) -> Option<accesskit::TreeUpdate> {
+        self.0.lock().a11y_tree_update.clone()
+    }
+
+    /// Sends an accessibility action through the platform callback.
+    /// Run the test executor afterward to dispatch the action.
+    ///
+    /// # Panics
+    /// Panics if accessibility was disabled in the window options.
+    pub fn simulate_accessibility_action(&self, request: accesskit::ActionRequest) {
+        let callbacks = self
+            .0
+            .lock()
+            .a11y_callbacks
+            .clone()
+            .expect("window accessibility must be enabled");
+        (callbacks.action)(request);
+    }
 }
 
 impl PlatformWindow for TestWindow {
+    fn a11y_init(&self, callbacks: A11yCallbacks) {
+        self.0.lock().a11y_callbacks = Some(Rc::new(callbacks));
+    }
+
+    fn a11y_tree_update(&self, tree_update: accesskit::TreeUpdate) {
+        self.0.lock().a11y_tree_update = Some(tree_update);
+    }
+
     fn visual_viewport_bounds(&self) -> Bounds<Pixels> {
         let state = self.0.lock();
         state
@@ -587,5 +636,77 @@ impl PlatformWindow for TestWindow {
 
     fn gpu_specs(&self) -> Option<GpuSpecs> {
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        AccessibleAction, Context, FocusHandle, IntoElement, Render, Role, TestAppContext, Window,
+        accesskit::{ActionRequest, TreeId},
+        div,
+        prelude::*,
+        px, size,
+    };
+
+    struct AccessibleTestView {
+        activations: usize,
+        focus: FocusHandle,
+    }
+
+    impl Render for AccessibleTestView {
+        fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+            div()
+                .id("activate")
+                .role(Role::Button)
+                .aria_label("Activate")
+                .track_focus(&self.focus)
+                .size(px(60.0))
+                .on_click(cx.listener(|view, _, _, cx| {
+                    view.activations += 1;
+                    cx.notify();
+                }))
+        }
+    }
+
+    #[crate::test]
+    fn platform_accessibility_activation_and_actions_reach_the_rendered_view(
+        cx: &mut TestAppContext,
+    ) {
+        let window = cx.open_window(size(px(200.0), px(100.0)), |_, cx| AccessibleTestView {
+            activations: 0,
+            focus: cx.focus_handle(),
+        });
+        let platform = cx.test_window(window.into());
+        assert!(platform.accessibility_tree_update().is_none());
+
+        platform.activate_accessibility();
+        cx.run_until_parked();
+        let tree = platform.accessibility_tree_update().unwrap();
+        let (id, node) = tree
+            .nodes
+            .iter()
+            .find(|(_, node)| node.label() == Some("Activate"))
+            .unwrap();
+        assert_eq!(node.role(), Role::Button);
+        assert!(node.supports_action(AccessibleAction::Click));
+        assert!(node.supports_action(AccessibleAction::Focus));
+
+        for action in [AccessibleAction::Focus, AccessibleAction::Click] {
+            platform.simulate_accessibility_action(ActionRequest {
+                action,
+                target_tree: TreeId::ROOT,
+                target_node: *id,
+                data: None,
+            });
+            cx.run_until_parked();
+        }
+        window
+            .update(cx, |view, window, _| {
+                assert_eq!(view.activations, 1);
+                assert!(view.focus.is_focused(window));
+            })
+            .unwrap();
+        assert_eq!(platform.accessibility_tree_update().unwrap().focus, *id);
     }
 }
