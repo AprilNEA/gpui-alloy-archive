@@ -1523,6 +1523,10 @@ impl WgpuRendererCore {
 
             for batch in scene.batches() {
                 match batch {
+                    #[cfg(target_os = "macos")]
+                    PrimitiveBatch::Backdrop(_) => {
+                        anyhow::bail!("backdrop materials require the native Metal renderer")
+                    }
                     PrimitiveBatch::Quads(range) => self.draw_instances(
                         &instance_bindings.quads,
                         &self.resources().pipelines.quads,
