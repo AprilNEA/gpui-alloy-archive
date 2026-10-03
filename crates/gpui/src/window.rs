@@ -6016,13 +6016,7 @@ impl Window {
         cx.propagate_event = true;
         self.dispatch_keystroke_interceptors(&keystroke, self.context_stack(), cx);
         if !cx.propagate_event {
-            self.finish_dispatch_key_event(
-                event,
-                Some(&keystroke),
-                dispatch_path,
-                self.context_stack(),
-                cx,
-            );
+            // An intercepted key must not reach capture handlers before propagation is checked again.
             return;
         }
 
