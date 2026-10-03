@@ -12,7 +12,7 @@ pub struct Backdrop {
     pub order: DrawOrder,
     /// Positive device pixels per logical pixel, used for edge details.
     pub scale_factor: f32,
-    /// Shape: 0 for rounded rectangle, 1 for capsule, 2 for circle.
+    /// Continuous shape: 0 for rounded rectangle, 1 for capsule, 2 for circle.
     pub shape: u32,
     /// Bounds of the material within the window.
     pub bounds: Bounds<ScaledPixels>,
@@ -32,7 +32,7 @@ pub struct Backdrop {
     pub refraction_amount: ScaledPixels,
     /// Distance over which refraction falls off inside the shape.
     pub refraction_width: ScaledPixels,
-    /// Blend from contour normal to radial optical direction.
+    /// Blend from the shape's optical direction to radial direction.
     pub direction_mix: f32,
     /// Chromatic dispersion displacement.
     pub dispersion: ScaledPixels,
@@ -53,7 +53,7 @@ pub struct Backdrop {
 /// window alpha and HDR/EDR composition are not supported.
 #[derive(Clone, Copy, Debug)]
 pub struct PaintBackdrop {
-    /// Shape: 0 for rounded rectangle, 1 for capsule, 2 for circle.
+    /// Continuous shape: 0 for rounded rectangle, 1 for capsule, 2 for circle.
     pub shape: u32,
     /// Bounds of the material within the window.
     pub bounds: Bounds<Pixels>,
@@ -71,7 +71,7 @@ pub struct PaintBackdrop {
     pub refraction_amount: Pixels,
     /// Distance over which refraction falls off inside the shape.
     pub refraction_width: Pixels,
-    /// Blend from contour normal to radial optical direction.
+    /// Blend from the shape's optical direction to radial direction.
     pub direction_mix: f32,
     /// Chromatic dispersion displacement.
     pub dispersion: Pixels,
@@ -88,12 +88,12 @@ impl From<Backdrop> for Primitive {
 }
 
 impl Scene {
-    pub(super) fn start_backdrop_epoch(&mut self) -> DrawOrder {
+    pub(super) fn start_material_epoch(&mut self) -> DrawOrder {
         self.order_base = self.max_order + 1;
         self.max_order = self.order_base;
         self.primitive_bounds.clear();
 
-        // A backdrop splits even an open paint_layer. Rebase its descendants
+        // A material splits even an open paint_layer. Rebase its descendants
         // without losing the bounds needed for ordering subsequent siblings.
         for (bounds, order) in &mut self.layer_stack {
             *order = self.order_base + self.primitive_bounds.insert(*bounds);

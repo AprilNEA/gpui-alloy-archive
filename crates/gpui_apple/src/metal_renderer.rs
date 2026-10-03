@@ -126,6 +126,7 @@ pub struct MetalRenderer {
     path_sprites_pipeline_state: metal::RenderPipelineState,
     shadows_pipeline_state: metal::RenderPipelineState,
     quads_pipeline_state: metal::RenderPipelineState,
+    continuous_quads_pipeline_state: metal::RenderPipelineState,
     underlines_pipeline_state: metal::RenderPipelineState,
     monochrome_sprites_pipeline_state: metal::RenderPipelineState,
     polychrome_sprites_pipeline_state: metal::RenderPipelineState,
@@ -294,6 +295,14 @@ impl MetalRenderer {
             "quad_fragment",
             MTLPixelFormat::BGRA8Unorm,
         );
+        let continuous_quads_pipeline_state = build_pipeline_state(
+            &device,
+            &library,
+            "continuous quads",
+            "continuous_quad_vertex",
+            "continuous_quad_fragment",
+            MTLPixelFormat::BGRA8Unorm,
+        );
         let underlines_pipeline_state = build_pipeline_state(
             &device,
             &library,
@@ -348,6 +357,7 @@ impl MetalRenderer {
             path_sprites_pipeline_state,
             shadows_pipeline_state,
             quads_pipeline_state,
+            continuous_quads_pipeline_state,
             underlines_pipeline_state,
             monochrome_sprites_pipeline_state,
             polychrome_sprites_pipeline_state,
@@ -705,7 +715,23 @@ impl MetalRenderer {
                     self.draw_shadows(range, instance_bindings, viewport_size, command_encoder)
                 }
                 PrimitiveBatch::Quads(range) => {
-                    self.draw_quads(range, instance_bindings, viewport_size, command_encoder)
+                    command_encoder.set_render_pipeline_state(&self.quads_pipeline_state);
+                    self.draw_quads(
+                        range,
+                        &instance_bindings.quads,
+                        viewport_size,
+                        command_encoder,
+                    )
+                }
+                PrimitiveBatch::ContinuousQuads(range) => {
+                    command_encoder
+                        .set_render_pipeline_state(&self.continuous_quads_pipeline_state);
+                    self.draw_quads(
+                        range,
+                        &instance_bindings.continuous_quads,
+                        viewport_size,
+                        command_encoder,
+                    )
                 }
                 PrimitiveBatch::Paths(range) => {
                     let paths = &scene.paths[range];
@@ -887,7 +913,7 @@ impl MetalRenderer {
     fn draw_quads(
         &self,
         quads: Range<usize>,
-        instance_bindings: &InstanceBindings,
+        instances: &InstanceBinding,
         viewport_size: Size<DevicePixels>,
         command_encoder: &metal::RenderCommandEncoderRef,
     ) {
@@ -895,7 +921,6 @@ impl MetalRenderer {
             return;
         }
 
-        command_encoder.set_render_pipeline_state(&self.quads_pipeline_state);
         command_encoder.set_vertex_buffer(
             QuadInputIndex::Vertices as u64,
             Some(&self.unit_vertices),
@@ -903,13 +928,13 @@ impl MetalRenderer {
         );
         command_encoder.set_vertex_buffer(
             QuadInputIndex::Quads as u64,
-            Some(&instance_bindings.quads.buffer),
-            instance_bindings.quads.offset as u64,
+            Some(&instances.buffer),
+            instances.offset as u64,
         );
         command_encoder.set_fragment_buffer(
             QuadInputIndex::Quads as u64,
-            Some(&instance_bindings.quads.buffer),
-            instance_bindings.quads.offset as u64,
+            Some(&instances.buffer),
+            instances.offset as u64,
         );
         command_encoder.set_vertex_bytes(
             QuadInputIndex::ViewportSize as u64,
@@ -1417,6 +1442,7 @@ struct InstanceBinding {
 
 struct InstanceBindings {
     quads: InstanceBinding,
+    continuous_quads: InstanceBinding,
     shadows: InstanceBinding,
     underlines: InstanceBinding,
     monochrome_sprites: InstanceBinding,
@@ -1427,6 +1453,7 @@ struct InstanceBindings {
 fn write_instances(scene: &Scene, writer: &mut InstanceBufferWriter) -> Result<InstanceBindings> {
     Ok(InstanceBindings {
         quads: writer.write(&scene.quads)?,
+        continuous_quads: writer.write(&scene.continuous_quads)?,
         shadows: writer.write(&scene.shadows)?,
         underlines: writer.write(&scene.underlines)?,
         monochrome_sprites: writer.write(&scene.monochrome_sprites)?,
